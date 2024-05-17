@@ -1,16 +1,13 @@
 """
     l_system_plugin
 """
-from __future__ import absolute_import, division, print_function
 import logging
-
 from mcedit2.editortools.generate import GeneratePlugin
 from mcedit2.synth.l_system import renderBlocks, renderSceneNodes, applyReplacementsIterated
 from mcedit2.util.showprogress import showProgress
 from mcedit2.widgets.spinslider import SpinSlider
 
 log = logging.getLogger(__name__)
-
 
 class LSystemPlugin(GeneratePlugin):
     """
@@ -31,7 +28,6 @@ class LSystemPlugin(GeneratePlugin):
     `iterationsSlider` will be ignored for the final generation. The `iterationsSlider` will
     still affect the GL rendering, which is useful for inspecting the system's state after every
     iteration.
-
     """
 
     recursive = True
@@ -61,7 +57,6 @@ class LSystemPlugin(GeneratePlugin):
 
     def createSymbolList(self, bounds, indefinite=False):
         system = self.createInitialSymbol(bounds)
-
         symbol_list = [system]
 
         if indefinite:
@@ -72,7 +67,6 @@ class LSystemPlugin(GeneratePlugin):
         def process(_symbol_list):
             for iteration, _symbol_list in applyReplacementsIterated(_symbol_list, max_iterations):
                 yield iteration, max_iterations
-
             yield _symbol_list
 
         symbol_list = showProgress("Generating...", process(symbol_list), cancel=True)
@@ -87,7 +81,6 @@ class LSystemPlugin(GeneratePlugin):
             return None
 
         log.info("Rendering symbols to OpenGL")
-
         sceneNodes = self.renderSceneNodes(symbol_list)
         return sceneNodes
 
@@ -100,7 +93,6 @@ class LSystemPlugin(GeneratePlugin):
             return None
 
         log.info("Rendering symbols to blocks")
-
         rendering = self.renderBlocks(symbol_list)
 
         log.info("Editing %d blocks" % len(rendering))
@@ -108,9 +100,7 @@ class LSystemPlugin(GeneratePlugin):
             x -= originalBounds.minx
             y -= originalBounds.miny
             z -= originalBounds.minz
-
             dimension.setBlock(x, y, z, blockType)
 
     def renderBlocks(self, symbol_list):
         return renderBlocks(symbol_list)
-
