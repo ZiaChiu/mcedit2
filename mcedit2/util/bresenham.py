@@ -7,7 +7,9 @@ from math import floor
 import itertools
 
 
-def bresenham_0((x1, y1), (x2, y2)):
+def bresenham_0(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
     e = 0  # error term
     y = y1  # current y
     m = (y2 - y1) / (x2 - x1)  # slope
@@ -24,7 +26,9 @@ def bresenham_0((x1, y1), (x2, y2)):
 # ---
 # Hoist the += m out of the if
 
-def bresenham_1((x1, y1), (x2, y2)):
+def bresenham_1(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
     e = 0
     y = y1
     m = (y2 - y1) / (x2 - x1)
@@ -43,7 +47,9 @@ def bresenham_1((x1, y1), (x2, y2)):
 # Multiply e and m by 2 * dx. m decomposes into dx and dy
 # Gains a bit of accuracy by losing the float division for m.
 
-def bresenham_2((x1, y1), (x2, y2)):
+def bresenham_2(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
     e = 0
     y = y1
     dy = y2 - y1
@@ -63,7 +69,9 @@ def bresenham_2((x1, y1), (x2, y2)):
 # ---
 # Initialize e to -dx
 
-def bresenham_3((x1, y1), (x2, y2)):
+def bresenham_3(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
     y = y1
     dx = x2 - x1
     dy = y2 - y1
@@ -84,7 +92,9 @@ def bresenham_3((x1, y1), (x2, y2)):
 # Add z1 and z2
 # Use multiple 'e' values for y and z
 
-def bresenham3D_3((x1, y1, z1), (x2, y2, z2)):
+def bresenham3D_3(p1, p2):
+    x1, y1, z1 = p1
+    x2, y2, z2 = p2
     y = y1
     z = z1
     dx = x2 - x1
@@ -114,7 +124,9 @@ def bresenham3D_3((x1, y1, z1), (x2, y2, z2)):
 # Multiply step by 65536
 # Divide yielded output by 65536
 
-def bresenham_4((x1, y1), (x2, y2)):
+def bresenham_4(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
     step = 65536
     x1 = int(floor(x1 * step))
     x2 = int(floor(x2 * step))
@@ -141,7 +153,9 @@ def bresenham_4((x1, y1), (x2, y2)):
 # Add z1 and z2
 # Use multiple 'e' values for y and z
 
-def bresenham3D_4((x1, y1, z1), (x2, y2, z2)):
+def bresenham3D_4(p1, p2):
+    x1, y1, z1 = p1
+    x2, y2, z2 = p2
     step = 65536
     x1 = int(floor(x1 * step))
     x2 = int(floor(x2 * step))
@@ -202,20 +216,11 @@ def bresenham(p1, p2):
     z2 = int(floor(z2 * step))
 
     dx = abs(x2 - x1)
-    if (x2 - x1) > 0:
-        sx = step
-    else:
-        sx = -step
+    sx = step if (x2 - x1) > 0 else -step
     dy = abs(y2 - y1)
-    if (y2 - y1) > 0:
-        sy = step
-    else:
-        sy = -step
+    sy = step if (y2 - y1) > 0 else -step
     dz = abs(z2 - z1)
-    if (z2 - z1) > 0:
-        sz = step
-    else:
-        sz = -step
+    sz = step if (z2 - z1) > 0 else -step
 
     # absolute value of distance vector (dy)
     distance = [dx, dy, dz]
@@ -236,7 +241,7 @@ def bresenham(p1, p2):
         yield tuple([(a >> logStep) for a in point])
 
         # add dy to error terms
-        error = map(lambda e, d: e + 2 * d, error, distance)
+        error = list(map(lambda e, d: e + 2 * d, error, distance))
 
         for j in otherAxes:
             while error[j] >= 0:
@@ -248,8 +253,8 @@ def bresenham(p1, p2):
 
 
 def testInt2D():
-    p1 = -10, -5
-    p2 = 2, 6
+    p1 = (-10, -5)
+    p2 = (2, 6)
 
     r0 = list(bresenham_0(p1, p2))
     r1 = list(bresenham_1(p1, p2))
@@ -258,27 +263,27 @@ def testInt2D():
     r4 = list(bresenham_4(p1, p2))
 
     if r0 != r1:  # no change
-        print "r0 != r1\n%s != \n%s" % (r0, r1)
+        print("r0 != r1\n{} != \n{}".format(r0, r1))
     if r1 == r2:  # accuracy gained
-        print "r1 == r2\n%s != \n%s" % (r1, r2)
+        print("r1 == r2\n{} != \n{}".format(r1, r2))
     if r2 != r3:  # no change
-        print "r2 != r3\n%s != \n%s" % (r2, r3)
+        print("r2 != r3\n{} != \n{}".format(r2, r3))
     if r3 != r4:  # no change
-        print "r3 != r4\n%s != \n%s" % (r3, r4)
+        print("r3 != r4\n{} != \n{}".format(r3, r4))
 
 
 def testFloat2D():
-    p1 = -64, -30
-    p2 = -2.66773328, -6.3785856262
+    p1 = (-64, -30)
+    p2 = (-2.66773328, -6.3785856262)
 
-    i1 = -64, -30
-    i2 = -3, -7
+    i1 = (-64, -30)
+    i2 = (-3, -7)
 
     r3 = list(bresenham_3(i1, i2))
     r4 = list(bresenham_4(p1, p2))
 
     if r3 == r4:  # accuracy gained
-        print "r3 == r4\n%s != \n%s" % (r3, r4)
+        print("r3 == r4\n{} != \n{}".format(r3, r4))
 
 
 def testFloat2D3D():
@@ -291,13 +296,13 @@ def testFloat2D3DWith(bres2d, bres3d, asInt=False):
     # It will not project along the major axis because it will sometimes move along one minor axis and then the other,
     # which will draw a right-angle which is never normally drawn.
 
-    print "Trying", bres2d, bres3d
-    p1 = -64, -30, -15
-    p2 = -2.66773328, -6.3785856262, 4.3333
+    print("Trying", bres2d, bres3d)
+    p1 = (-64, -30, -15)
+    p2 = (-2.66773328, -6.3785856262, 4.3333)
 
     if asInt:
-        p1 = map(int, p1)
-        p2 = map(int, p2)
+        p1 = list(map(int, p1))
+        p2 = list(map(int, p2))
 
     r4_xy = list(bres2d(p1[:2], p2[:2]))
     r4_xz = list(bres2d((p1[0], p1[2]), (p2[0], p2[2])))
@@ -307,19 +312,19 @@ def testFloat2D3DWith(bres2d, bres3d, asInt=False):
     r5_xz = [(x, z) for x, y, z in r5]
 
     if r4_xy != r5_xy:  # no change for (x, y)
-        print "2d_xy != 3d_xy\n%s != \n%s" % (r4_xy, r5_xy)
+        print("2d_xy != 3d_xy\n{} != \n{}".format(r4_xy, r5_xy))
     if r4_xz != r5_xz:  # no change for (x, z)
-        print "2d_xz != 3d_xz\n%s != \n%s" % (r4_xz, r5_xz)
+        print("2d_xz != 3d_xz\n{} != \n{}".format(r4_xz, r5_xz))
 
 def testFloat3D():
-    p1 = -64, -30, -15
-    p2 = -2.66773328, -6.3785856262, 4.3333
+    p1 = (-64, -30, -15)
+    p2 = (-2.66773328, -6.3785856262, 4.3333)
 
     r0 = list(bresenham3D_4(p1, p2))
     r1 = list(bresenham(p1, p2))
 
     if r0 != r1:  # no change
-        print "r0 != r1\n%s != \n%s" % (r0, r1)
+        print("r0 != r1\n{} != \n{}".format(r0, r1))
 
 def main():
     testInt2D()
@@ -330,4 +335,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
