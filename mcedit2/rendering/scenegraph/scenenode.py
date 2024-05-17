@@ -131,6 +131,7 @@ class Node(object):
             if parent:
                 parent.dirty = True
 
+
 class NamedChildrenNode(Node):
     RenderNodeClass = rendernode.RenderNode
 
@@ -165,4 +166,4 @@ class NamedChildrenNode(Node):
 
     @property
     def children(self):
-        return self._children.itervalues()
+        return self._children.values()
