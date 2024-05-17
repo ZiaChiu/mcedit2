@@ -64,10 +64,12 @@ The following commands use the command block's name (defaults to @) in their
 output: /me, /say, and /tell.
 """
 
+
 class ParseError(ValueError):
     """
     Raised when parsing command text fails (due to wrong number of arguments, for example)
     """
+
 
 def ParseCommand(commandText):
     if commandText[0] == "/":
@@ -82,7 +84,7 @@ def ParseCommand(commandText):
         try:
             return cmdClass(args)
         except Exception as e:
-            log.warn("Parse error while parsing command %r", commandText)
+            log.warning("Parse error while parsing command %r", commandText)
             raise
 
 
@@ -105,6 +107,7 @@ def formatCoords(cmd):
     return formatCoordTuple(cmd.x, cmd.relX,
                             cmd.y, cmd.relY,
                             cmd.z, cmd.relZ)
+
 
 def formatCoordTuple(x, relX, y, relY, z, relZ):
     text = ""
@@ -129,6 +132,7 @@ def formatCoordTuple(x, relX, y, relY, z, relZ):
                     text += str(z)
     return text
 
+
 def formatDetectCoords(cmd):
     text = ""
     if cmd.relDX:
@@ -149,6 +153,7 @@ def formatDetectCoords(cmd):
 
     return text
 
+
 def formatRepr(cmd, attrs):
     args = ", ".join("%s=%s" % (a, getattr(cmd, a)) for a in attrs)
     return "%s(%s)" % (cmd.__class__.__name__, args)
@@ -168,7 +173,7 @@ def argsplit(args, numargs, required=0):
     Like str.split(), but always returns a list of length `numargs`
     """
 
-    args = args.split(None, numargs-1)
+    args = args.split(None, numargs - 1)
     if len(args) < required:
         raise ParseError("Not enough arguments to command.")
     if len(args) < numargs:
@@ -181,6 +186,7 @@ def argpop(args):
     Pop one arg off the front of args and return (arg, rest)
     """
     return argsplit(args, 2)
+
 
 class TargetSelector(object):
     playerName = None
@@ -212,7 +218,6 @@ class TargetSelector(object):
                 ret += "[%s]" % (selectorText,)
 
             return ret
-
 
     def __init__(self, selectorText):
         if selectorText[0] == "@":
@@ -266,6 +271,7 @@ class TargetSelector(object):
         self.targetArgs = [(k, v) for k, v in self.targetArgs if k != arg]
         self.targetArgs.append((arg, value))
 
+
 def resolvePosition(point, x, relX, y, relY, z, relZ):
     if relX:
         x = point[0] + x
@@ -279,9 +285,11 @@ def resolvePosition(point, x, relX, y, relY, z, relZ):
 
 _commandClasses = {}
 
+
 def register_command(cls):
     _commandClasses[cls.name] = cls
     return cls
+
 
 @register_command
 class GiveCommand(object):
@@ -303,6 +311,7 @@ class GiveCommand(object):
             self.data, rest = argpop(rest)
             if rest:
                 self.dataTag = rest
+
 
 class BoundingBoxCommand(object):
 
@@ -347,7 +356,7 @@ class BoundingBoxCommand(object):
 @register_command
 class FillCommand(BoundingBoxCommand):
     name = "fill"
-    
+
     def __str__(self):
         raise NotImplementedError
 
@@ -385,7 +394,7 @@ class CloneCommand(BoundingBoxCommand):
             args += " " + self.tileName
 
         return "/%s %s" % (self.name, args)
-    
+
     def __init__(self, args):
         x1, y1, z1, x2, y2, z2, dx, dy, dz, rest = argsplit(args, 10, required=9)
 
@@ -466,7 +475,7 @@ class ExecuteCommand(PositionalCommand):
     name = "execute"
     subcommand = None
     targetSelector = None
-    
+
     dx = dy = dz = None
     relDX = relDY = relDZ = False
 
@@ -485,7 +494,7 @@ class ExecuteCommand(PositionalCommand):
     def __init__(self, args):
         selectorText, x, y, z, rest = argsplit(args, 5, required=4)
         self.targetSelector = TargetSelector(selectorText)
-    
+
         # x, y, z are relative to the entity that is targeted.
         self.x, self.relX = parseCoord(x)
         self.y, self.relY = parseCoord(y)
@@ -493,7 +502,7 @@ class ExecuteCommand(PositionalCommand):
 
         if rest.startswith("detect"):
             _detect, dx, dy, dz, blockID, blockData, rest = argsplit(rest, 7)
-            
+
             # dx, dy, dz are relative to the x, y, z computed from the entity
             self.dx, self.relDX = parseCoord(dx)
             self.dy, self.relDY = parseCoord(dy)
@@ -505,7 +514,7 @@ class ExecuteCommand(PositionalCommand):
         commandText = rest
 
         self.subcommand = ParseCommand(commandText)
-            
+
 
 @register_command
 class SetBlockCommand(PositionalCommand):
@@ -548,7 +557,6 @@ class SetBlockCommand(PositionalCommand):
             oldBlockHandling = "replace"
         else:
             dataTag = rest
-
 
         self.dataValue = dataValue
         self.oldBlockHandling = oldBlockHandling
@@ -648,14 +656,16 @@ def main():
         testReencode(cmdText)
         testReencodeWithDataTag(cmdText)
 
+
 def testReencode(cmdText):
     cmd = ParseCommand(cmdText)
     assert not isinstance(cmd, UnknownCommand), "Command \"%s...\" is an UnknownCommand" % cmdText[:20]
     newCmdText = str(cmd)
-    #assert cmdText == newCmdText, "Expected: \n%s\nFound: \n%s" % (cmdText, newCmdText)
+    # assert cmdText == newCmdText, "Expected: \n%s\nFound: \n%s" % (cmdText, newCmdText)
 
     newNewCmdText = str(ParseCommand(newCmdText))
     assert newCmdText == newNewCmdText, "Expected: \n%s\nFound: \n%s" % (newCmdText, newNewCmdText)
+
 
 def testReencodeWithDataTag(cmdText):
     cmd = ParseCommand(cmdText)
@@ -669,6 +679,7 @@ def testReencodeWithDataTag(cmdText):
     cmd.dataTagText = encoded
     newCmdText = str(cmd)
     assert str(ParseCommand(newCmdText)) == str(cmd)
+
 
 if __name__ == '__main__':
     main()
