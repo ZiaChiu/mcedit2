@@ -1,5 +1,4 @@
-
-cdef enum:
+cdef enum BiomeType:
     BIOME_NONE = 0
     BIOME_GRASS = 1
     BIOME_FOLIAGE = 2
@@ -8,16 +7,16 @@ cdef enum:
     BIOME_REDSTONE = 5
 
 cdef struct ModelQuad:
-    float[32] xyzuvstc
-    char[4] cullface  # isCulled, dx, dy, dz
-    char[4] quadface  # face, dx, dy, dz
+    float xyzuvstc[32]
+    char cullface[4]  # isCulled, dx, dy, dz
+    char quadface[4]  # face, dx, dy, dz
     char biomeTintType
 
 cdef struct ModelQuadList:
     int count
     ModelQuad *quads
 
-cdef class ModelQuadListObj(object):
+cdef class ModelQuadListObj:
     cdef ModelQuadList quadList
 
 cdef class BlockModels:
