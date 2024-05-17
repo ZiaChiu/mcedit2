@@ -3,13 +3,10 @@
 """
 from __future__ import absolute_import, division, print_function
 import logging
-
 import time
 from OpenGL import GL
-
-from PySide import QtCore
-import numpy
-
+from PySide6 import QtCore
+import numpy as np
 from mcedit2.rendering import cubes
 from mcedit2.rendering.scenegraph import scenenode, rendernode, states
 from mcedit2.rendering.chunknode import ChunkGroupNode, ChunkNode
@@ -33,8 +30,8 @@ class CullFace(states.SceneNodeState):
     def exit(self):
         GL.glDisable(GL.GL_CULL_FACE)
 
-class NonAirMaskSelection(SelectionBox):
 
+class NonAirMaskSelection(SelectionBox):
     def __init__(self, dimension, box):
         """
 
@@ -62,10 +59,7 @@ class NonAirMaskSelection(SelectionBox):
         :return:
         :rtype:
         """
-        #if self.volume > 40:
-        #    import pdb; pdb.set_trace()
-
-        mask = numpy.zeros(shape=box.size, dtype=bool)
+        mask = np.zeros(shape=box.size, dtype=bool)
 
         for cx, cz in box.chunkPositions():
             try:
@@ -79,12 +73,12 @@ class NonAirMaskSelection(SelectionBox):
                 sectionBox = box.intersect(SectionBox(cx, cy, cz))
                 if sectionBox.volume == 0:
                     continue
-                slices = numpy.s_[
+                slices = np.s_[
                     sectionBox.miny & 0xf:(sectionBox.miny & 0xf) + sectionBox.height,
                     sectionBox.minz & 0xf:(sectionBox.minz & 0xf) + sectionBox.length,
                     sectionBox.minx & 0xf:(sectionBox.minx & 0xf) + sectionBox.width,
                 ]
-                maskSlices = numpy.s_[
+                maskSlices = np.s_[
                     sectionBox.miny - box.miny:sectionBox.maxy - box.miny,
                     sectionBox.minz - box.minz:sectionBox.maxz - box.minz,
                     sectionBox.minx - box.minx:sectionBox.maxx - box.minx,
@@ -97,11 +91,6 @@ class NonAirMaskSelection(SelectionBox):
 
 class SelectionScene(scenenode.Node):
     def __init__(self):
-        """
-
-        :return:
-        :rtype:
-        """
         super(SelectionScene, self).__init__()
         self.cullFace = CullFace()
         self.blend = _RenderstateAlphaBlend()
@@ -119,6 +108,7 @@ class SelectionScene(scenenode.Node):
         self.loadTimer.stop()
 
     _selection = None
+
     @property
     def selection(self):
         return self._selection
@@ -130,6 +120,7 @@ class SelectionScene(scenenode.Node):
             self.updateSelection()
 
     _dimension = None
+
     @property
     def dimension(self):
         return self._dimension
@@ -171,7 +162,7 @@ class SelectionScene(scenenode.Node):
         if self._loader is None:
             self._loader = self.loadSections()
         try:
-            self._loader.next()
+            next(self._loader)
         except StopIteration:
             self._loader = None
 
@@ -216,13 +207,13 @@ class SelectionScene(scenenode.Node):
         :rtype: list[ndarray]
         """
         sy = sz = sx = 16
-        exposedY = numpy.zeros((sy+1, sz, sx), dtype=bool)
-        exposedZ = numpy.zeros((sy, sz+1, sx), dtype=bool)
-        exposedX = numpy.zeros((sy, sz, sx+1), dtype=bool)
+        exposedY = np.zeros((sy + 1, sz, sx), dtype=bool)
+        exposedZ = np.zeros((sy, sz + 1, sx), dtype=bool)
+        exposedX = np.zeros((sy, sz, sx + 1), dtype=bool)
 
-        exposedY[:] = mask[1:,   1:-1, 1:-1] != mask[ :-1, 1:-1, 1:-1]
-        exposedZ[:] = mask[1:-1, 1:,   1:-1] != mask[1:-1,  :-1, 1:-1]
-        exposedX[:] = mask[1:-1, 1:-1, 1:  ] != mask[1:-1, 1:-1,  :-1]
+        exposedY[:] = mask[1:, 1:-1, 1:-1] != mask[:-1, 1:-1, 1:-1]
+        exposedZ[:] = mask[1:-1, 1:, 1:-1] != mask[1:-1, :-1, 1:-1]
+        exposedX[:] = mask[1:-1, 1:-1, 1:] != mask[1:-1, 1:-1, :-1]
 
         exposedByFace = [
             exposedX[:, :, 1:],
@@ -238,7 +229,7 @@ class SelectionScene(scenenode.Node):
     def buildSection(self, sectionMask, cy):
         vertexArrays = []
 
-        for (face, exposedFaceMask) in enumerate(self.exposedBlockMasks(sectionMask)):
+        for face, exposedFaceMask in enumerate(self.exposedBlockMasks(sectionMask)):
             blockMask = sectionMask[1:-1, 1:-1, 1:-1] & exposedFaceMask
 
             vertexBuffer = QuadVertexArrayBuffer.fromBlockMask(face, blockMask, False, False)
@@ -256,11 +247,12 @@ class SelectionScene(scenenode.Node):
 faceShades = {
     faces.FaceNorth: (0x33, 0x33, 0x99),
     faces.FaceSouth: (0x33, 0x33, 0x99),
-    faces.FaceEast:  (0x44, 0x44, 0xCC),
-    faces.FaceWest:  (0x44, 0x44, 0xCC),
-    faces.FaceUp:    (0x55, 0x55, 0xFF),
-    faces.FaceDown:  (0x22, 0x22, 0x77),
+    faces.FaceEast: (0x44, 0x44, 0xCC),
+    faces.FaceWest: (0x44, 0x44, 0xCC),
+    faces.FaceUp: (0x55, 0x55, 0xFF),
+    faces.FaceDown: (0x22, 0x22, 0x77),
 }
+
 
 class SelectionBoxRenderNode(rendernode.RenderNode):
     def drawSelf(self):
@@ -294,6 +286,7 @@ class SelectionBoxRenderNode(rendernode.RenderNode):
                 GL.glLineWidth(1.0)
                 cubes.drawBox(box)
 
+
 class SelectionBoxNode(scenenode.Node):
     RenderNodeClass = SelectionBoxRenderNode
     _selectionBox = None
@@ -301,6 +294,7 @@ class SelectionBoxNode(scenenode.Node):
     wire = True
 
     _filled = True
+
     @property
     def filled(self):
         return self._filled
@@ -320,6 +314,7 @@ class SelectionBoxNode(scenenode.Node):
         self.dirty = True
 
     _color = (.3, .3, 1, .3)
+
     @property
     def color(self):
         return self._color
@@ -330,6 +325,7 @@ class SelectionBoxNode(scenenode.Node):
         self.dirty = True
 
     _wireColor = (.8, .8, .8, .6)
+
     @property
     def wireColor(self):
         return self._wireColor
@@ -378,7 +374,6 @@ class SelectionFaceNode(scenenode.Node):
         self._selectionBox = value
         self.dirty = True
 
-
     @property
     def face(self):
         return self._face
@@ -389,6 +384,7 @@ class SelectionFaceNode(scenenode.Node):
         self.dirty = True
 
     _color = (.3, .3, 1, .15)
+
     @property
     def color(self):
         return self._color
@@ -400,6 +396,7 @@ class SelectionFaceNode(scenenode.Node):
         self.dirty = True
 
     _wireColor = (.8, .8, .8, .6)
+
     @property
     def wireColor(self):
         return self._wireColor
@@ -409,6 +406,7 @@ class SelectionFaceNode(scenenode.Node):
         assert len(value) == 4
         self._wireColor = value
         self.dirty = True
+
 
 def boxFaceUnderCursor(box, mouseRay):
     """
@@ -449,7 +447,7 @@ def boxFaceUnderCursor(box, mouseRay):
             faceNormal[d] = 1
             cameraBehind = nearPoint[d] - box.maximum[d] < 0
 
-        if numpy.dot(faceNormal, mouseVector) > 0 or cameraBehind:
+        if np.dot(faceNormal, mouseVector) > 0 or cameraBehind:
             # the face adjacent to the clicked edge faces away from the cam
             # xxxx this is where to allow iso views in face-on angles to grab edges
             # xxxx also change face highlight node to highlight this area
