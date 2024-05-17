@@ -64,4 +64,3 @@ class CompassNode(scenenode.Node):
         y, p = self._yawPitch = value
         self.yawState.degrees = y - 180
         self.pitchState.degrees = p
-
