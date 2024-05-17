@@ -4,6 +4,7 @@ from PySide6.scripts.pyside_tool import pyside6_uic
 
 log = logging.getLogger(__name__)
 
+
 def compile_ui():
     from mcedit2.util import resources
     if not resources.isSrcCheckout():
@@ -16,6 +17,7 @@ def compile_ui():
     compile_ui_dir(uiDir, recurse=True)
     log.info("Done.")
 
+
 def compile_ui_dir(directory, recurse=False):
     for root, dirs, files in os.walk(directory):
         for file in files:
@@ -27,6 +29,7 @@ def compile_ui_dir(directory, recurse=False):
 
         if not recurse:
             break
+
 
 if __name__ == '__main__':
     compile_ui()
