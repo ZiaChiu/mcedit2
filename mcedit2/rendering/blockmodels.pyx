@@ -8,7 +8,7 @@ import json
 import logging
 import math
 import itertools
-from PySide import QtGui
+from PySide6 import QtGui
 
 import numpy as np
 cimport numpy as cnp
@@ -229,7 +229,7 @@ cdef class BlockModels(object):
                 resourceVariant = block.resourceVariant
                 self.blockStatesByResourcePathVariant[resourcePath, resourceVariant].append((internalName, blockState))
                 parts = self.loadResourceVariant(resourcePath, resourceVariant)
-                
+
             if parts is None or len(parts) == 0:
                 continue
 
@@ -316,18 +316,18 @@ cdef class BlockModels(object):
             textures = modelDict.get("textures")
             if textures is not None:
                 # Resolve texture variables in parent to values in child
-                for k, v in textures.iteritems():
+                for k, v in textures.items():
                     if k in textureVars:
                         # Child always overrides parent
                         continue
                     if v.startswith("#"):
                         v = textureVars.get(v[1:], v)
                     textureVars[k] = v
-                    
+
             elements = modelDict.get("elements")
             if elements is not None:
                 allElements.extend(elements)
-                
+
             parentName = modelDict.get("parent")
             if parentName is None:
                 break
@@ -341,7 +341,7 @@ cdef class BlockModels(object):
             return
 
         if block.forcedModelTextures:  # user-configured model textures
-            for var, tex in block.forcedModelTextures.iteritems():
+            for var, tex in block.forcedModelTextures.items():
                 textureVars[var[1:]] = tex
 
         if block.biomeTintType == "grass":
@@ -435,7 +435,7 @@ cdef class BlockModels(object):
                 else:
                     log.warn("Variant key for %s#%s contains no variants, skipping...", resourcePath, resourceVariant)
                     return None
-            
+
             modelName = variantDict.get('model')
 
             if modelName is None:
@@ -458,7 +458,7 @@ cdef class BlockModels(object):
 
         def matchWhen(when, variantMap):
             ok = True
-            for key, val in when.iteritems():
+            for key, val in when.items():
                 if key == 'OR':
                     ok = False
                     for when2 in val:
@@ -510,7 +510,7 @@ cdef class BlockModels(object):
                     if apply is not None:
                         if not isinstance(apply, list):
                             apply = [apply]
-                            
+
                         for model in apply:
                             modelName = model.get('model')
                             if modelName is None:
@@ -527,7 +527,7 @@ cdef class BlockModels(object):
                             variantXrot = model.get('x', 0)
                             variantYrot = model.get('y', 0)
                             ret.append((modelDict, variantXrot, variantYrot))
-            
+
             return ret
 
     def buildBoxQuads(self, dict element, unicode nameAndState, dict textureVars,
@@ -554,7 +554,7 @@ cdef class BlockModels(object):
         cdef short i
         cdef dict info
 
-        for face, info in element["faces"].iteritems():
+        for face, info in element["faces"].items():
             assert info is not None
 
             face = facesByCardinal[face]
@@ -571,7 +571,7 @@ cdef class BlockModels(object):
                     u1, v1, u2, v2 = <short>(x1 * 16), <short>(y1 * 16), <short>(x2 * 16), <short>(y2 * 16)
                 elif face == FaceEast or face == FaceWest:
                     u1, v1, u2, v2 = <short>(z1 * 16), <short>(y1 * 16), <short>(z2 * 16), <short>(y2 * 16)
-                    
+
 
             lasttexvar = texture
 
@@ -637,7 +637,7 @@ cdef class BlockModels(object):
         cookedModels = {}
         UNKNOWN_BLOCK = u'MCEDIT_UNKNOWN'
 
-        for (path, variant), allQuads in self.quadsByResourcePathVariant.iteritems():
+        for (path, variant), allQuads in self.quadsByResourcePathVariant.items():
 
             modelQuads.count = len(allQuads)
             modelQuads.quads = <ModelQuad *>malloc(modelQuads.count * sizeof(ModelQuad))
@@ -753,7 +753,7 @@ cdef class BlockModels(object):
                         ID, meta = self.blocktypes.IDsByState[internalName + blockState]
                     except KeyError:
                         continue
-                    
+
                 # cookedModels[nameAndState] = cookedQuads
                 if path == UNKNOWN_BLOCK:
                     unknownBlockModel = modelQuads
@@ -1060,4 +1060,3 @@ cdef void getBlockFaceVertices(float[] xyzuvstc,
         ]
     else:
         raise ValueError("Unknown face %s" % face)
-
