@@ -1,14 +1,15 @@
-"""View frustum modeling as series of clipping planes
+"""
+View frustum modeling as series of clipping planes
 
 Based on code from:
-    http://www.markmorley.com/opengl/frustumculling.html
+    https://www.markmorley.com/opengl/frustumculling.html
 """
 
 import logging
-import numpy
-from OpenGL import GL
-context_log = logging.getLogger()
+import numpy as np
+from OpenGL.GL import glGetDoublev, GL_PROJECTION_MATRIX, GL_MODELVIEW_MATRIX
 
+context_log = logging.getLogger()
 
 def viewingMatrix(projection=None, model=None):
     """Calculate the total viewing matrix from given data
@@ -25,37 +26,35 @@ def viewingMatrix(projection=None, model=None):
         matrix, the function will raise a RuntimeError
     """
     if projection is None:
-        projection = GL.glGetDoublev(GL.GL_PROJECTION_MATRIX)
+        projection = glGetDoublev(GL_PROJECTION_MATRIX)
     if model is None:
-        model = GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX)
-    # hmm, this will likely fail on 64-bit platforms :(
+        model = glGetDoublev(GL_MODELVIEW_MATRIX)
     if projection is None or model is None:
-        context_log.warn(
-            """A NULL matrix was returned from glGetDoublev: proj=%s modelView=%s""",
+        context_log.warning(
+            "A NULL matrix was returned from glGetDoublev: proj=%s modelView=%s",
             projection, model,
         )
-        if projection:
+        if projection is not None:
             return projection
-        if model:
+        if model is not None:
             return model
         else:
-            return numpy.identity(4, 'd')
-    if numpy.allclose(projection, -1.79769313e+308):
-        context_log.warn(
-            """Attempt to retrieve projection matrix when uninitialised %s, model=%s""",
+            return np.identity(4, 'd')
+    if np.allclose(projection, -1.79769313e+308):
+        context_log.warning(
+            "Attempt to retrieve projection matrix when uninitialised %s, model=%s",
             projection, model,
         )
         return model
-    if numpy.allclose(model, -1.79769313e+308):
-        context_log.warn(
-            """Attempt to retrieve model-view matrix when uninitialised %s, projection=%s""",
+    if np.allclose(model, -1.79769313e+308):
+        context_log.warning(
+            "Attempt to retrieve model-view matrix when uninitialised %s, projection=%s",
             model, projection,
         )
         return projection
-    return numpy.dot(model, projection)
+    return np.dot(model, projection)
 
-
-class Frustum (object):
+class Frustum:
     """Holder for frustum specification for intersection tests
 
     Note:
@@ -81,14 +80,14 @@ class Frustum (object):
         if not len(points):
             return []
 
-        distances = numpy.sum(self.planes[numpy.newaxis, :, :] * points[:, numpy.newaxis, :], -1)
-        return ~numpy.any(distances < -radius, -1)
+        distances = np.sum(self.planes[np.newaxis, :, :] * points[:, np.newaxis, :], axis=-1)
+        return ~np.any(distances < -radius, axis=-1)
 
     def visible1(self, point, radius):
         #return self.visible(array(point[numpy.newaxis, :]), radius)
 
-        distance = numpy.sum(self.planes * point, -1)
-        vis = ~numpy.any(distance < -radius, -1)
+        distance = np.sum(self.planes * point, -1)
+        vis = ~np.any(distance < -radius, -1)
         #assert vis == self.visible(array(point)[numpy.newaxis, :], radius)
 
         return vis
@@ -110,8 +109,8 @@ class Frustum (object):
         """
         if matrix is None:
             matrix = viewingMatrix()
-        clip = numpy.ravel(matrix)
-        frustum = numpy.empty((6, 4), 'd')
+        clip = np.ravel(matrix)
+        frustum = np.empty((6, 4), 'd')
         # right
         frustum[0][0] = clip[3] - clip[0]
         frustum[0][1] = clip[7] - clip[4]
@@ -141,7 +140,7 @@ class Frustum (object):
         frustum[5][0] = clip[3] + clip[2]
         frustum[5][1] = clip[7] + clip[6]
         frustum[5][2] = clip[11] + clip[10]
-        frustum[5][3] = (clip[15] + clip[14])
+        frustum[5][3] = clip[15] + clip[14]
         if normalize:
             frustum = cls.normalize(frustum)
         obj = cls()
@@ -152,10 +151,8 @@ class Frustum (object):
     @classmethod
     def normalize(cls, frustum):
         """Normalize clipping plane equations"""
-        magnitude = numpy.sqrt(frustum[:, 0] * frustum[:, 0] + frustum[:, 1] * frustum[:, 1] + frustum[:, 2] * frustum[:, 2])
-        # eliminate any planes which have 0-length vectors,
-        # those planes can't be used for excluding anything anyway...
-        frustum = numpy.compress(magnitude, frustum, 0)
-        magnitude = numpy.compress(magnitude, magnitude, 0)
-        magnitude = numpy.reshape(magnitude.astype('d'), (len(frustum), 1))
+        magnitude = np.sqrt(frustum[:, 0] ** 2 + frustum[:, 1] ** 2 + frustum[:, 2] ** 2)
+        frustum = np.compress(magnitude, frustum, axis=0)
+        magnitude = np.compress(magnitude, magnitude, axis=0)
+        magnitude = np.reshape(magnitude.astype('d'), (len(frustum), 1))
         return frustum / magnitude
