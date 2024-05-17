@@ -10,6 +10,7 @@ from mceditlib import faces
 
 log = logging.getLogger(__name__)
 
+
 def drawBox(box, cubeType=GL.GL_QUADS, texture=None, textureVertices=None, selectionBox=False):
     """ pass a different cubeType e.g. GL_LINE_STRIP for wireframes """
     x, y, z, = box.origin
@@ -108,7 +109,6 @@ def drawBox(box, cubeType=GL.GL_QUADS, texture=None, textureVertices=None, selec
             GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
 
 
-
 def drawFace(box, face, elementType=GL.GL_QUADS):
     x, y, z, = box.origin
     x2, y2, z2 = box.maximum
@@ -119,7 +119,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x, y2, z,
              x, y, z,
              x, y, z2,
-            ), dtype='f4')
+             ), dtype='f4')
 
     elif face == faces.FaceXIncreasing:
         faceVertices = numpy.array(
@@ -127,7 +127,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x2, y, z,
              x2, y2, z,
              x2, y2, z2,
-            ), dtype='f4')
+             ), dtype='f4')
 
     elif face == faces.FaceYDecreasing:
         faceVertices = numpy.array(
@@ -135,7 +135,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x, y, z2,
              x, y, z,
              x2, y, z,
-            ), dtype='f4')
+             ), dtype='f4')
 
     elif face == faces.FaceYIncreasing:
         faceVertices = numpy.array(
@@ -143,7 +143,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x, y2, z,
              x, y2, z2,
              x2, y2, z2,
-            ), dtype='f4')
+             ), dtype='f4')
 
     elif face == faces.FaceZDecreasing:
         faceVertices = numpy.array(
@@ -151,7 +151,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x, y2, z,
              x2, y2, z,
              x2, y, z,
-            ), dtype='f4')
+             ), dtype='f4')
 
     elif face == faces.FaceZIncreasing:
         faceVertices = numpy.array(
@@ -159,7 +159,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
              x2, y2, z2,
              x, y2, z2,
              x, y, z2,
-            ), dtype='f4')
+             ), dtype='f4')
     else:
         raise ValueError("Unknown face %s" % face)
 
@@ -194,7 +194,7 @@ def drawFace(box, face, elementType=GL.GL_QUADS):
 
 
 def drawConstructionCube(box, color, texture=None):
-    #if texture == None:
+    # if texture == None:
     #    texture = self.sixteenBlockTex
     with gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_ENABLE_BIT):
         GL.glEnable(GL.GL_BLEND)
@@ -220,11 +220,9 @@ def drawConstructionCube(box, color, texture=None):
         drawBox(box, texture=texture, selectionBox=True)
 
 
-
 def drawTerrainCuttingWire(box,
                            c0=(0.75, 0.75, 0.75, 0.4),
                            c1=(1.0, 1.0, 1.0, 1.0)):
-
     GL.glEnable(GL.GL_DEPTH_TEST)
 
     # Above ground parts
