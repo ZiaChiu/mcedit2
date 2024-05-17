@@ -1,12 +1,9 @@
-"""
-    player_server_test
-"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 import uuid
 
-import pytest as pytest
-from PySide import QtCore
+import pytest
+from PySide6 import QtCore
 
 from mcedit2.util.player_server import PlayerDataCache
 
@@ -28,7 +25,6 @@ def test_get_name(player_uuid):
     global app
     if app is None:
         app = QtCore.QCoreApplication([])
-    #loop = QtCore.QEventLoop()
     obj = {}
 
     def callback(result, error):
@@ -39,5 +35,3 @@ def test_get_name(player_uuid):
     PlayerDataCache.getPlayerInfo(player_uuid, callback)
 
     app.exec_()
-
-
