@@ -1,13 +1,10 @@
 """
-    ${NAME}
+    scene
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
-import sys
 import collections
 import itertools
-
-import numpy
+import numpy as np
 
 from mcedit2.rendering.layers import Layer
 from mcedit2.rendering import chunkupdate
@@ -19,7 +16,6 @@ from mcedit2.rendering.chunkupdate import ChunkRenderInfo
 from mcedit2.rendering.depths import DepthOffsets
 from mcedit2.rendering.geometrycache import GeometryCache
 from mcedit2.rendering.scenegraph.depth_test import DepthOffset
-from mcedit2.rendering.scenegraph.scenenode import Node
 from mcedit2.rendering.scenegraph.texture_atlas import TextureAtlasState
 from mcedit2.util.glutils import Texture
 from mcedit2.util.load_png import loadPNGData
@@ -28,9 +24,8 @@ from mceditlib.anvil.biome_types import BiomeTypes
 log = logging.getLogger(__name__)
 
 
-
 def layerProperty(layer, default=True):
-    attr = intern(str("_draw" + layer))
+    attr = f"_draw{layer}"
 
     def _get(self):
         return getattr(self, attr, default)
@@ -43,7 +38,7 @@ def layerProperty(layer, default=True):
     return property(_get, _set)
 
 
-class SceneUpdateTask(object):
+class SceneUpdateTask:
     showRedraw = True
     showHiddenOres = False
     showChunkRedraw = True
@@ -72,16 +67,16 @@ class SceneUpdateTask(object):
         self.mapTextures = {}
         self.modelTextures = {}
 
-        self.renderType = numpy.zeros((256*256,), 'uint8')
+        self.renderType = np.zeros((256 * 256,), 'uint8')
         self.renderType[:] = 3
         for block in self.worldScene.dimension.blocktypes:
             self.renderType[block.ID] = block.renderType
 
         biomeTypes = BiomeTypes()
-        self.biomeRain = numpy.zeros((256*256,), numpy.float32)
-        self.biomeTemp = numpy.zeros((256*256,), numpy.float32)
+        self.biomeRain = np.zeros((256 * 256,), np.float32)
+        self.biomeTemp = np.zeros((256 * 256,), np.float32)
 
-        for biome in biomeTypes.types.itervalues():
+        for biome in biomeTypes.types.values():
             self.biomeRain[biome.ID] = biome.rainfall
             self.biomeTemp[biome.ID] = biome.temperature
 
@@ -161,14 +156,13 @@ class SceneUpdateTask(object):
         except Exception as e:
             log.exception(u"Rendering chunk %s failed: %r", cPos, e)
 
-    def chunkNotPresent(self, (cx, cz)):
+    def chunkNotPresent(self, cPos):
         # Assume chunk was deleted by the user
         for renderstate in renderstates.allRenderstates:
             groupNode = self.worldScene.getRenderstateGroup(renderstate)
-            groupNode.discardChunkNode(cx, cz)
+            groupNode.discardChunkNode(*cPos)
 
     def getMapTexture(self, mapID):
-
         if mapID in self.mapTextures:
             return self.mapTextures[mapID]
         try:
@@ -200,7 +194,7 @@ class SceneUpdateTask(object):
 
 class WorldScene(scenenode.Node):
     def __init__(self, dimension, textureAtlas=None, geometryCache=None, bounds=None):
-        super(WorldScene, self).__init__()
+        super().__init__()
 
         self.dimension = dimension
         self.textureAtlas = textureAtlas
@@ -243,7 +237,7 @@ class WorldScene(scenenode.Node):
             self.discardAllChunks()
 
     def chunkPositions(self):
-        return self.chunkRenderInfo.iterkeys()
+        return self.chunkRenderInfo.keys()
 
     def getRenderstateGroup(self, rsClass):
         groupNode = self.renderstateNodes.get(rsClass)
@@ -254,7 +248,7 @@ class WorldScene(scenenode.Node):
         """
         Discard the chunk at the given position from the scene
         """
-        for groupNode in self.renderstateNodes.itervalues():
+        for groupNode in self.renderstateNodes.values():
             groupNode.discardChunkNode(cx, cz)
         self.chunkRenderInfo.pop((cx, cz), None)
 
@@ -263,7 +257,7 @@ class WorldScene(scenenode.Node):
             self.discardChunk(cx, cz)
 
     def discardAllChunks(self):
-        for groupNode in self.renderstateNodes.itervalues():
+        for groupNode in self.renderstateNodes.values():
             groupNode.clear()
         self.chunkRenderInfo.clear()
 
@@ -329,7 +323,6 @@ class WorldScene(scenenode.Node):
     def getChunkRenderInfo(self, cPos):
         chunkInfo = self.chunkRenderInfo.get(cPos)
         if chunkInfo is None:
-            #log.info("Creating ChunkRenderInfo %s in %s", cPos, self.worldScene)
             chunkInfo = ChunkRenderInfo(self, cPos)
             self.chunkRenderInfo[cPos] = chunkInfo
 
@@ -341,7 +334,7 @@ class WorldScene(scenenode.Node):
         else:
             self.visibleLayers.discard(layerName)
 
-        for groupNode in self.renderstateNodes.itervalues():
+        for groupNode in self.renderstateNodes.values():
             groupNode.setLayerVisible(layerName, visible)
 
     def setVisibleLayers(self, layerNames):
