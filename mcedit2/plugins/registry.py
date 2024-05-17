@@ -1,10 +1,7 @@
-"""
-    registry
-"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 
-from PySide import QtCore
+from PySide6 import QtCore
 
 log = logging.getLogger(__name__)
 
@@ -30,9 +27,12 @@ class PluginClassRegistry(QtCore.QObject):
         if issubclass(cls, self.pluginClass):
             self.pendingRegistrations.append(cls)
         else:
-            raise ValueError("Class %s must inherit from CommandPlugin" % cls)
+            raise ValueError("Class %s must inherit from %s" % (cls, self.pluginClass))
         return cls
 
     def unregisterClass(self, cls):
         if issubclass(cls, self.pluginClass):
             self.pluginRemoved.emit(cls)
+            # TODO: check if it affects running
+            if cls in self.registeredPlugins:
+                self.registeredPlugins.remove(cls)
