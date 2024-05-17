@@ -9,6 +9,7 @@ from mcedit2.util import resources
 
 log = logging.getLogger(__name__)
 
+
 # no build scripts for linux yet. no idea if frozen apps will be built for linux.
 # put user files in checkout dir when running from source checkout, otherwise ~/.mcedit2
 
@@ -29,7 +30,7 @@ def getUserFilesDirectory():
     # If this filename is the script filename, you lose.
 
     if resources.isSrcCheckout():
-        # Source checkouts don't use the same folder as regular installs.
+        # Source checkouts don't use the same folder as regular installations.
         dataDir = os.path.join(os.path.dirname(resources.getSrcFolder()), "MCEdit 2 Files")
     else:
         dataDir = os.path.expanduser("~/.mcedit2")
