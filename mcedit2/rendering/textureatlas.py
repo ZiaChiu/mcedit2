@@ -1,16 +1,14 @@
 """
     textureatlas
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
-import itertools
 from PySide6 import QtOpenGL
 
 from OpenGL import GL
 import numpy as np
 
 from mcedit2.util.load_png import loadPNGData
-from mcedit2.rendering.lightmap import generateLightmap
+from mcedit2.rendering.lightmap import generate_lightmap as generateLightmap
 from mcedit2.resourceloader import ResourceLoader, ResourceNotFound
 from mcedit2.util import glutils
 from mcedit2.util.resources import resourcePath
@@ -218,8 +216,8 @@ class TextureAtlas:
             self._lightTexture.load()
 
         log.info("GL resources loaded for TextureAtlas for %s", util.displayName(self._filename))
-        #file("terrain-%sw-%sh.raw" % (atlasWidth, atlasHeight), "wb").write(texData.tostring())
-        #raise SystemExit
+        # file("terrain-%sw-%sh.raw" % (atlasWidth, atlasHeight), "wb").write(texData.tostring())
+        # raise SystemExit
 
     def _openImageStream(self, name):
         if name == "MCEDIT_UNKNOWN":
@@ -349,5 +347,3 @@ def _getMaxSize():
 
 def test_TextureAtlas():
     rl = ResourceLoader()
-
-
