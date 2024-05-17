@@ -19,8 +19,7 @@ from libc.string cimport memcpy
 
 log = logging.getLogger(__name__)
 
-
-lPowerLevels = [p/15. * 0.6 + 0.4 for p in range(16)]
+lPowerLevels = [p / 15. * 0.6 + 0.4 for p in range(16)]
 
 lRedstonePowerColors = [
     (p if p > 0.4 else 0.3, max(0.0, p * p * 0.7 - 0.5), max(0.0, p * p * 0.6 - 0.7))
@@ -28,12 +27,12 @@ lRedstonePowerColors = [
 ]
 cdef unsigned char redstonePowerColors[16 * 4]
 for i, (r, g, b) in enumerate(lRedstonePowerColors):
-    redstonePowerColors[i*4] = b * 255
-    redstonePowerColors[i*4+1] = g * 255
-    redstonePowerColors[i*4+2] = r * 255
-    redstonePowerColors[i*4+3] = 255
+    redstonePowerColors[i * 4] = b * 255
+    redstonePowerColors[i * 4 + 1] = g * 255
+    redstonePowerColors[i * 4 + 2] = r * 255
+    redstonePowerColors[i * 4 + 3] = 255
 
-cdef unsigned char * foliageBitsPine = [0x61, 0x99, 0x61, 0xFF];   # BGRA
+cdef unsigned char * foliageBitsPine = [0x61, 0x99, 0x61, 0xFF];  # BGRA
 cdef unsigned char * foliageBitsBirch = [0x55, 0xA7, 0x80, 0xFF];  # BGRA
 
 class BlockModelMesh(object):
@@ -177,7 +176,8 @@ class BlockModelMesh(object):
         waterTex[1] = waterTexTuple[1]
         waterTex[2] = waterTexTuple[2]
         waterTex[3] = waterTexTuple[3]
-        lavaTexTuple = self.sectionUpdate.chunkUpdate.textureAtlas.texCoordsByName["assets/minecraft/textures/blocks/lava_still.png"]
+        lavaTexTuple = self.sectionUpdate.chunkUpdate.textureAtlas.texCoordsByName[
+            "assets/minecraft/textures/blocks/lava_still.png"]
         cdef float[4] lavaTex
         lavaTex[0] = lavaTexTuple[0]
         lavaTex[1] = lavaTexTuple[1]
@@ -187,7 +187,7 @@ class BlockModelMesh(object):
         cdef float * fluidTex
 
         cdef unsigned short y, z, x, ID, meta
-        cdef short dx, dy, dz,
+        cdef short dx, dy, dz
         cdef unsigned short nx, ny, nz, nID, upID
         cdef unsigned char nMeta
         cdef blockmodels.ModelQuadList quads
@@ -203,7 +203,7 @@ class BlockModelMesh(object):
 
         cdef size_t buffer_ptr = 0
         cdef size_t buffer_size = 256
-        cdef float * vertexBuffer = <float *>malloc(buffer_size * sizeof(float) * quadFloats)
+        cdef float * vertexBuffer = <float *> malloc(buffer_size * sizeof(float) * quadFloats)
         cdef float * xyzuvstc
         cdef numpy.ndarray vabuffer
         cdef unsigned char * vertexColor
@@ -257,19 +257,19 @@ class BlockModelMesh(object):
                             state = state.split('[')[1]
                             props = state[:-1].split(",")
                             props = [p.split("=") for p in props]
-                            return {k:v for k,v in props}
+                            return {k: v for k, v in props}
 
                         def combineProps(props):
                             props = [k + "=" + v for k, v in props.iteritems()]
                             return tuple(sorted(props))
 
                         if grassID and (ID == grassID):
-                            if (areaBlocks[y+1, z, x] == snowID
-                                or areaBlocks[y+1, z, x] == snowLayerID):
+                            if (areaBlocks[y + 1, z, x] == snowID
+                                    or areaBlocks[y + 1, z, x] == snowLayerID):
                                 actualState = "minecraft:grass", ("snowy=true",)
 
                         if (fenceID and (ID == fenceID)
-                            or netherFenceID and (ID == netherFenceID)):
+                                or netherFenceID and (ID == netherFenceID)):
                             props = []
                             for direction, dx, dz in [
                                 ("north", 0, -1),
@@ -277,18 +277,18 @@ class BlockModelMesh(object):
                                 ("west", -1, 0),
                                 ("east", 1, 0),
                             ]:
-                                nID = areaBlocks[y, z+dz, x+dx]
+                                nID = areaBlocks[y, z + dz, x + dx]
                                 props.append(direction + "=" + ("true"
-                                             if opaqueCube[nID]
-                                                or fenceID and nID == fenceID
-                                                or fenceGateID and nID == fenceGateID
-                                                or netherFenceID and nID == netherFenceID
-                                             else "false"))
+                                                                if opaqueCube[nID]
+                                                                   or fenceID and nID == fenceID
+                                                                   or fenceGateID and nID == fenceGateID
+                                                                   or netherFenceID and nID == netherFenceID
+                                                                else "false"))
                             actualState = blocktypes.namesByID[ID], tuple(sorted(props))
 
                         if (paneID and (ID == paneID)
-                            or stainedGlassPaneID and (ID == stainedGlassPaneID)
-                            or barsID and (ID == barsID)):
+                                or stainedGlassPaneID and (ID == stainedGlassPaneID)
+                                or barsID and (ID == barsID)):
                             props = {}
                             if ID == stainedGlassPaneID:
                                 props = parseProps(ID, meta)
@@ -299,35 +299,35 @@ class BlockModelMesh(object):
                                 ("west", -1, 0),
                                 ("east", 1, 0),
                             ]:
-                                nID = areaBlocks[y, z+dz, x+dx]
+                                nID = areaBlocks[y, z + dz, x + dx]
                                 props[direction] = ("true"
-                                             if opaqueCube[nID]
-                                                or (paneID and nID == paneID)
-                                                or (barsID and nID == barsID)
-                                                or (stainedGlassPaneID and nID == stainedGlassPaneID)
-                                                or (glassID and nID == glassID)
-                                                or (stainedGlassID and nID == stainedGlassID)
-                                             else "false")
+                                                    if opaqueCube[nID]
+                                                       or (paneID and nID == paneID)
+                                                       or (barsID and nID == barsID)
+                                                       or (stainedGlassPaneID and nID == stainedGlassPaneID)
+                                                       or (glassID and nID == glassID)
+                                                       or (stainedGlassID and nID == stainedGlassID)
+                                                    else "false")
                             actualState = blocktypes.namesByID[ID], combineProps(props)
 
                         if ((woodenDoorID and ID == woodenDoorID)
-                            or (ironDoorID and ID == ironDoorID)
-                            or (birchDoorID and ID == birchDoorID)
-                            or (spruceDoorID and ID == spruceDoorID)
-                            or (jungleDoorID and ID == jungleDoorID)
-                            or (acaciaDoorID and ID == acaciaDoorID)
-                            or (darkOakDoorID and ID == darkOakDoorID)
-                            ):
+                                or (ironDoorID and ID == ironDoorID)
+                                or (birchDoorID and ID == birchDoorID)
+                                or (spruceDoorID and ID == spruceDoorID)
+                                or (jungleDoorID and ID == jungleDoorID)
+                                or (acaciaDoorID and ID == acaciaDoorID)
+                                or (darkOakDoorID and ID == darkOakDoorID)
+                        ):
                             props = parseProps(ID, meta)
                             if len(props):
                                 if props['half'] == 'upper':
-                                    nID = areaBlocks[y-1, z, x]
+                                    nID = areaBlocks[y - 1, z, x]
                                     if nID == ID:
-                                        lowerProps = parseProps(areaBlocks[y-1, z, x], areaData[y-1, z, x])
+                                        lowerProps = parseProps(areaBlocks[y - 1, z, x], areaData[y - 1, z, x])
                                         for p in ['facing', 'hinge', 'open']:
                                             props[p] = lowerProps[p]
                                         actualState = blocktypes.namesByID[ID], combineProps(props)
-                        
+
                         if cobbleWallID and ID == cobbleWallID:
                             props = parseProps(ID, meta)
                             props['up'] = "true"
@@ -338,20 +338,20 @@ class BlockModelMesh(object):
                                 ("west", -1, 0),
                                 ("east", 1, 0),
                             ]:
-                                nID = areaBlocks[y, z+dz, x+dx]
+                                nID = areaBlocks[y, z + dz, x + dx]
                                 if nID == ID:
                                     props[direction] = "true"
                                 wallCount += 1
-                                
+
                             if wallCount == 2 and (
-                                (props['north'] == props['south'] == 'true')
-                                or (props['east'] == props['west'] == 'true')
+                                    (props['north'] == props['south'] == 'true')
+                                    or (props['east'] == props['west'] == 'true')
                             ):
-                                if areaBlocks[y+1, z, x] == 0:
+                                if areaBlocks[y + 1, z, x] == 0:
                                     props['up'] = 'false'
-                            
+
                             actualState = blocktypes.namesByID[ID], combineProps(props)
-                            
+
                         if tripwireID and ID == tripwireID:
                             props = parseProps(ID, meta)
                             for direction, dx, dz in [
@@ -360,26 +360,26 @@ class BlockModelMesh(object):
                                 ("west", -1, 0),
                                 ("east", 1, 0),
                             ]:
-                                nID = areaBlocks[y, z+dz, x+dx]
+                                nID = areaBlocks[y, z + dz, x + dx]
                                 if nID == ID:
                                     props[direction] = "true"
-                                
+
                             actualState = blocktypes.namesByID[ID], combineProps(props)
-                                                
+
                         if redstoneWireID and ID == redstoneWireID:
                             props = parseProps(ID, meta)
                             def isConnectible(nID, nMeta, dx, dz):
                                 if (nID == redstoneWireID
-                                    or (upComparatorID and nID == upComparatorID)
-                                    or (pComparatorID and nID == pComparatorID)
-                                    or (nID in powerSources)
-                                    ):
+                                        or (upComparatorID and nID == upComparatorID)
+                                        or (pComparatorID and nID == pComparatorID)
+                                        or (nID in powerSources)
+                                ):
                                     return True
                                 elif ((pRepeaterID and nID == pRepeaterID)
                                       or (upRepeaterID and nID == upRepeaterID)):
                                     nProps = parseProps(nID, nMeta)
                                     if (dz != 0 and nProps['facing'] in ('north', 'south')
-                                        or dx != 0 and nProps['facing'] in ('east', 'west')):
+                                            or dx != 0 and nProps['facing'] in ('east', 'west')):
                                         return True
 
                             if len(props):
@@ -389,19 +389,19 @@ class BlockModelMesh(object):
                                     ("west", -1, 0),
                                     ("east", 1, 0),
                                 ]:
-                                    nID = areaBlocks[y, z+dz, x+dx]
-                                    nMeta = areaData[y, z+dz, x+dx]
+                                    nID = areaBlocks[y, z + dz, x + dx]
+                                    nMeta = areaData[y, z + dz, x + dx]
                                     if isConnectible(nID, nMeta, dx, dz):
                                         props[direction] = "side"
 
                                     elif opaqueCube[nID] > 0:  # xxx isFullOpaqueCube
-                                        nID = areaBlocks[y+1, z+dz, x+dx]
-                                        nMeta = areaData[y+1, z+dz, x+dx]
+                                        nID = areaBlocks[y + 1, z + dz, x + dx]
+                                        nMeta = areaData[y + 1, z + dz, x + dx]
                                         if isConnectible(nID, nMeta, dx, dz):
                                             props[direction] = "up"
                                     else:
-                                        nID = areaBlocks[y-1, z+dz, x+dx]
-                                        nMeta = areaData[y-1, z+dz, x+dx]
+                                        nID = areaBlocks[y - 1, z + dz, x + dx]
+                                        nMeta = areaData[y - 1, z + dz, x + dx]
                                         if isConnectible(nID, nMeta, dx, dz):
                                             props[direction] = "side"
 
@@ -432,7 +432,7 @@ class BlockModelMesh(object):
                                 nz = z + quad.cullface[3]
                                 nID = areaBlocks[ny, nz, nx]
                                 if (ID == endPortalID
-                                    and quad.cullface[2] == -1):
+                                        and quad.cullface[2] == -1):
                                     doCull = 0
                                 elif (ID == anvilID
                                       or ID == dragonEggID
@@ -440,14 +440,14 @@ class BlockModelMesh(object):
                                       or ID == fenceGateID
                                       or ID == hopperID
                                       or ID == pistonHeadID
-                                      ):
+                                ):
                                     doCull = 0
                                 elif ID == carpetID and quad.cullface[2] == 1:
                                     doCull = 0
                                 elif ((ID == glassID or ID == stainedGlassID)
                                       and ((glassID and nID == glassID)
                                            or (stainedGlassID and nID == stainedGlassID))
-                                      ):
+                                ):
                                     doCull = 1
                                 elif ((ID == paneID
                                        or ID == barsID)
@@ -459,8 +459,8 @@ class BlockModelMesh(object):
                                       or ID == stoneSlab2ID
                                       or ID == woodenSlabID):
                                     if ((stoneSlabID and nID == stoneSlabID)
-                                        or (stoneSlab2ID and nID == stoneSlab2ID)
-                                        or (woodenSlabID and nID == woodenSlabID)):
+                                            or (stoneSlab2ID and nID == stoneSlab2ID)
+                                            or (woodenSlabID and nID == woodenSlabID)):
                                         if (meta & 0x8) == (areaData[ny, nz, nx] & 0x8):
                                             doCull = 1
                                     else:
@@ -489,13 +489,13 @@ class BlockModelMesh(object):
 
                             if quad.biomeTintType:
                                 if quad.biomeTintType == blockmodels.BIOME_GRASS:
-                                    imageX = <unsigned int>((1.0 - temperature) * (blockModels.grassImageX - 1))
-                                    imageY = <unsigned int>((1.0 - rainfall) * (blockModels.grassImageY - 1))
+                                    imageX = <unsigned int> ((1.0 - temperature) * (blockModels.grassImageX - 1))
+                                    imageY = <unsigned int> ((1.0 - rainfall) * (blockModels.grassImageY - 1))
                                     imageOffset = imageX + blockModels.grassImageX * imageY
                                     tintColor = &blockModels.grassImageBits[imageOffset * 4]
                                 if quad.biomeTintType == blockmodels.BIOME_FOLIAGE:
-                                    imageX = <unsigned int>((1.0 - temperature) * (blockModels.foliageImageX - 1))
-                                    imageY = <unsigned int>((1.0 - rainfall) * (blockModels.foliageImageY - 1))
+                                    imageX = <unsigned int> ((1.0 - temperature) * (blockModels.foliageImageX - 1))
+                                    imageY = <unsigned int> ((1.0 - rainfall) * (blockModels.foliageImageY - 1))
                                     imageOffset = imageX + blockModels.foliageImageX * imageY
                                     tintColor = &blockModels.foliageImageBits[imageOffset * 4]
                                 if quad.biomeTintType == blockmodels.BIOME_FOLIAGE_PINE:
@@ -506,17 +506,17 @@ class BlockModelMesh(object):
                                     tintColor = &redstonePowerColors[redstonePower * 4]
                                     # print("REDSTONE TINT", redstonePower, tintColor[0], tintColor[1], tintColor[2])
 
-                                vertexColor = <unsigned char *>xyzuvstc
+                                vertexColor = <unsigned char *> xyzuvstc
                                 for vertex in range(4):
                                     for channel in range(3):
                                         color = vertexColor[vertexBytes * vertex + vertexBytes - 4 + channel]
                                         # image format is ARGB8, but this is with respect to 4-byte words
                                         # when the words are little endian, the byte ordering becomes BGRA
                                         # what i REALLY SHOULD do is get the pixel as an int and bit shift the bytes out.
-                                        color *= tintColor[2-channel]
+                                        color *= tintColor[2 - channel]
                                         color >>= 8
-                                        vertexColor[vertexBytes * vertex + vertexBytes - 4 + channel] = <unsigned char>color
-
+                                        vertexColor[
+                                            vertexBytes * vertex + vertexBytes - 4 + channel] = <unsigned char> color
 
                             xyzuvstc[0] += rx
                             xyzuvstc[1] += ry
@@ -524,20 +524,17 @@ class BlockModelMesh(object):
                             xyzuvstc[5] += sl
                             xyzuvstc[6] += bl
 
-
                             xyzuvstc[8] += rx
                             xyzuvstc[9] += ry
                             xyzuvstc[10] += rz
                             xyzuvstc[13] += sl
                             xyzuvstc[14] += bl
 
-
                             xyzuvstc[16] += rx
                             xyzuvstc[17] += ry
                             xyzuvstc[18] += rz
                             xyzuvstc[21] += sl
                             xyzuvstc[22] += bl
-
 
                             xyzuvstc[24] += rx
                             xyzuvstc[25] += ry
@@ -549,7 +546,7 @@ class BlockModelMesh(object):
 
                             if buffer_ptr >= buffer_size:
                                 buffer_size *= 2
-                                vertexBuffer = <float *>realloc(vertexBuffer, buffer_size * sizeof(float) * quadFloats)
+                                vertexBuffer = <float *> realloc(vertexBuffer, buffer_size * sizeof(float) * quadFloats)
 
                     elif renderType[ID] == 1:
                         if ID == waterFlowID or ID == waterID:
@@ -593,7 +590,6 @@ class BlockModelMesh(object):
                             xyzuvstc[5] += sl
                             xyzuvstc[6] += bl
 
-
                             xyzuvstc[8] += rx
                             xyzuvstc[9] += ry
                             xyzuvstc[10] += rz
@@ -602,7 +598,6 @@ class BlockModelMesh(object):
                             xyzuvstc[13] += sl
                             xyzuvstc[14] += bl
 
-
                             xyzuvstc[16] += rx
                             xyzuvstc[17] += ry
                             xyzuvstc[18] += rz
@@ -610,7 +605,6 @@ class BlockModelMesh(object):
                             xyzuvstc[20] += fluidTex[1]
                             xyzuvstc[21] += sl
                             xyzuvstc[22] += bl
-
 
                             xyzuvstc[24] += rx
                             xyzuvstc[25] += ry
@@ -624,7 +618,7 @@ class BlockModelMesh(object):
 
                             if buffer_ptr >= buffer_size:
                                 buffer_size *= 2
-                                vertexBuffer = <float *>realloc(vertexBuffer, buffer_size * sizeof(float) * quadFloats)
+                                vertexBuffer = <float *> realloc(vertexBuffer, buffer_size * sizeof(float) * quadFloats)
 
         if buffer_ptr:  # now buffer size
             vertexArray = QuadVertexArrayBuffer(buffer_ptr)
