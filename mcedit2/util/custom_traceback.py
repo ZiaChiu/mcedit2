@@ -4,24 +4,16 @@
 from __future__ import absolute_import, division, print_function
 import logging
 import sys
+import traceback
 from collections import namedtuple
 
 log = logging.getLogger(__name__)
 
-
-import traceback
-
-_MCETraceFrame = namedtuple('_MCETraceFrame', 'filename lineno name line')
-
+_MCETraceFrame = namedtuple('_MCETraceFrame', 'filename lineno name line selfstr')
 
 class MCETraceFrame(_MCETraceFrame):
-    def __new__(cls, *args):
-        return _MCETraceFrame.__new__(cls, *args[:-1])
-
-    def __init__(self, *args):
-        _MCETraceFrame.__init__(self, *args[:-1])
-        self.selfstr = args[-1]
-
+    def __new__(cls, filename, lineno, name, line, selfstr=" "):
+        return _MCETraceFrame.__new__(cls, filename, lineno, name, line, selfstr)
 
 def extract_tb(tb, limit=None):
     """Return list of up to limit pre-processed entries from traceback.
@@ -40,7 +32,7 @@ def extract_tb(tb, limit=None):
     if limit is None:
         if hasattr(sys, 'tracebacklimit'):
             limit = sys.tracebacklimit
-    list = []
+    frames = []
     n = 0
     while tb is not None and (limit is None or n < limit):
         f = tb.tb_frame
@@ -53,7 +45,7 @@ def extract_tb(tb, limit=None):
             selfstr = self and "(self is a {0})".format(self.__class__.__name__) or " "
             if hasattr(self, 'name'):
                 selfstr += "(named %s)" % self.name
-        except:
+        except Exception:
             selfstr = " "
         traceback.linecache.checkcache(filename)
         line = traceback.linecache.getline(filename, lineno, f.f_globals)
@@ -61,11 +53,10 @@ def extract_tb(tb, limit=None):
             line = line.strip()
         else:
             line = None
-        list.append(MCETraceFrame(filename, lineno, name, line, selfstr))
+        frames.append(MCETraceFrame(filename, lineno, name, line, selfstr))
         tb = tb.tb_next
-        n = n + 1
-    return list
-
+        n += 1
+    return frames
 
 def format_list(extracted_list):
     """Format a list of traceback entry tuples for printing.
@@ -80,17 +71,14 @@ def format_list(extracted_list):
     This function is modified to include the 5th item of the tuple as
     the name of the class of the 'self' parameter.
     """
-    list = []
+    lines = []
     for frame in extracted_list:
-        filename, lineno, name, line = frame
-        selfstr = getattr(frame, 'selfstr', None)
-
+        filename, lineno, name, line, selfstr = frame
         item = '  File "%s", line %d, in %s %s\n' % (filename, lineno, name, selfstr[:60])
         if line:
-            item = item + '    %s\n' % line.strip()
-        list.append(item)
-    return list
-
+            item += '    %s\n' % line.strip()
+        lines.append(item)
+    return lines
 
 def print_list(extracted_list, file=None):
     """Print the list of tuples as returned by extract_tb() or
@@ -102,14 +90,11 @@ def print_list(extracted_list, file=None):
     if file is None:
         file = sys.stderr
     for entry in extracted_list:
-        filename, lineno, name, line = entry
-        selfstr = getattr(entry, 'selfstr', None)
-
+        filename, lineno, name, line, selfstr = entry
         print('  File "%s", line %d, in %s %s' % (filename, lineno, name, selfstr),
               file=file)
         if line:
             print('    %s' % line.strip(), file=file)
-
 
 def print_tb(tb, limit=None, file=None):
     """Print up to 'limit' stack trace entries from the traceback 'tb'.
@@ -127,7 +112,6 @@ def print_tb(tb, limit=None, file=None):
         if hasattr(sys, 'tracebacklimit'):
             limit = sys.tracebacklimit
     n = 0
-    _print = traceback._print
     while tb is not None and (limit is None or n < limit):
         f = tb.tb_frame
         lineno = tb.tb_lineno
@@ -137,17 +121,16 @@ def print_tb(tb, limit=None, file=None):
         self = f.f_locals.get('self')
         try:
             selfstr = self and "(self is a {0})".format(self.__class__.__name__) or " "
-        except:
+        except Exception:
             selfstr = " "
-        _print(file,
-               '  File "%s", line %d, in %s %s' % (filename, lineno, name, selfstr))
-        linecache = traceback.linecache
-        linecache.checkcache(filename)
-        line = linecache.getline(filename, lineno, f.f_globals)
-        if line: _print(file, '    ' + line.strip())
+        print('  File "%s", line %d, in %s %s' % (filename, lineno, name, selfstr),
+              file=file)
+        traceback.linecache.checkcache(filename)
+        line = traceback.linecache.getline(filename, lineno, f.f_globals)
+        if line:
+            print('    %s' % line.strip(), file=file)
         tb = tb.tb_next
         n += 1
-
 
 def install():
     traceback.extract_tb = extract_tb
