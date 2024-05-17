@@ -7,7 +7,7 @@ import logging
 import time
 import weakref
 
-from PySide import QtCore
+from PySide6 import QtCore
 from mcedit2.util import profiler
 
 from mcedit2.widgets.infopanel import InfoPanel
@@ -26,7 +26,7 @@ class ChunkLoaderInfo(InfoPanel):
     @property
     def client(self):
         if len(self.object.clients):
-            return "Client: %s" % (self.object.clients[0])
+            return f"Client: {self.object.clients[0]}"
 
 class IChunkLoaderClient(object):
     def requestChunk(self):
@@ -46,18 +46,23 @@ class IChunkLoaderClient(object):
         """
         pass
 
-    def wantsChunk(self, (cx, cz)):
+    def wantsChunk(self, chunkPos):
         """
         Called on each client after a chunk is requested, but before it is loaded.
 
         Return False to skip loading the chunk at the given position.
         If all clients return False, the chunk is not loaded.
 
+        Parameters
+        ----------
+        chunkPos : tuple[int, int]
+
         Returns
         -------
 
         wantsChunk : bool
         """
+        pass
 
     def recieveChunk(self, chunk):
         """
@@ -79,8 +84,9 @@ class IChunkLoaderClient(object):
 
         worker : Iterable | None
         """
+        pass
 
-    def chunkNotLoaded(self, (cx, cz), exc):
+    def chunkNotLoaded(self, chunkPos, exc):
         """
         Called when a chunk fails to load due to an exception.
 
@@ -88,13 +94,14 @@ class IChunkLoaderClient(object):
 
         Parameters
         ----------
-        (cx, cz) : (int, int)
+        chunkPos : tuple[int, int] --> (cx, cz)
             Position of the failed chunk.
 
         exc : The Exception object thrown by the world, usually IOError or LevelFormatError
         """
+        pass
 
-    def chunkNotPresent(self, (cx, cz)):
+    def chunkNotPresent(self, chunkPos):
         """
         Called when a chunk fails to load because it is not present in the world.
 
@@ -105,21 +112,24 @@ class IChunkLoaderClient(object):
         (cx, cz) : (int, int)
             chunk position
         """
+        pass
 
-    def chunkInvalid(self, (cx, cz), deleted):
+    def chunkInvalid(self, chunkPos, deleted):
         """
         Called when the revision changes indicate a chunk is modified or deleted.
 
         Parameters
         ----------
+        chunkPos : tuple[int, int]
+
         deleted : bool
             True if the chunk was deleted.
 
         Returns
         -------
         None
-
         """
+        pass
 
 class ChunkLoader(QtCore.QObject):
     chunkCompleted = QtCore.Signal()
@@ -146,7 +156,7 @@ class ChunkLoader(QtCore.QObject):
         dimension : WorldEditorDimension
             The dimension to load chunks from.
         """
-        QtCore.QObject.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.clients = []
         self.dimension = dimension
@@ -198,11 +208,11 @@ class ChunkLoader(QtCore.QObject):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.chunkWorker is None:
             self.chunkWorker = self._loadChunks()
         try:
-            return self.chunkWorker.next()
+            return next(self.chunkWorker)
         except StopIteration:
             self.chunkWorker = None
             raise
