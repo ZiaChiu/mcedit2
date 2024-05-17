@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
-from PySide import QtGui
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from mcedit2.command import SimplePerformCommand
 from mcedit2.editortools import EditorTool
@@ -101,7 +101,7 @@ class BrushCommand(SimplePerformCommand):
         self.performed = True
 
 
-class BrushToolWidget(QtGui.QWidget, Ui_brushWidget):
+class BrushToolWidget(QtWidgets.QWidget, Ui_brushWidget):
     def __init__(self, *args, **kwargs):
         super(BrushToolWidget, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -120,7 +120,7 @@ class BrushTool(EditorTool):
         self.brushMode = None
         self.brushLoader = None
 
-        self.brushModesByName = {cls.name:cls(self) for cls in BrushModeClasses}
+        self.brushModesByName = {cls.name: cls(self) for cls in BrushModeClasses}
         brushModes = self.brushModesByName.values()
         self.toolWidget.brushModeInput.setModes(brushModes)
         BrushModeSetting.connectAndCall(self.modeSettingChanged)
@@ -193,7 +193,7 @@ class BrushTool(EditorTool):
         pos = self.hoverPosition(event)
         if pos:
             self.dragPoints.append(pos)
-            
+
     def mouseMove(self, event):
         pos = self.hoverPosition(event)
         if pos:
@@ -272,5 +272,3 @@ class BrushTool(EditorTool):
             self.cursorBoxNode.filled = False
 
             self.cursorNode.addChild(self.cursorBoxNode)
-
-

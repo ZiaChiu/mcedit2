@@ -3,7 +3,7 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
-from PySide import QtGui, QtCore
+from PySide6 import QtGui, QtCore
 from mcedit2.editortools.brush.masklevel import MaskLevel
 from mcedit2.util.showprogress import showProgress
 from mcedit2.widgets.block_replacement_list import BlockReplacementButton

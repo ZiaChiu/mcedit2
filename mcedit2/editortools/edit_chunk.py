@@ -3,16 +3,15 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
-from PySide import QtGui
+from PySide6 import QtWidgets
 
 from mcedit2.editortools import EditorTool
 from mcedit2.ui.editortools.select_chunk import Ui_selectChunkWidget
 
-
 log = logging.getLogger(__name__)
 
 
-class ChunkToolWidget(QtGui.QWidget, Ui_selectChunkWidget):
+class ChunkToolWidget(QtWidgets.QWidget, Ui_selectChunkWidget):
     def __init__(self, *args, **kwargs):
         super(ChunkToolWidget, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -38,4 +37,3 @@ class ChunkTool(EditorTool):
         cx = x >> 4
         cz = z >> 4
         self.editorSession.inspectChunk(cx, cz)
-

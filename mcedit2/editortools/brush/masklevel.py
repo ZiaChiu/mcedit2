@@ -2,7 +2,7 @@
     masklevel
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
-import numpy
+import numpy as np
 
 from mceditlib.selection import BoundingBox
 
@@ -41,9 +41,9 @@ class MaskLevel(object):
 
 
 class FakeBrushSection(object):
-    BlockLight = numpy.empty((16, 16, 16), dtype=numpy.uint8)
+    BlockLight = np.empty((16, 16, 16), dtype=np.uint8)
     BlockLight[:] = 15
-    SkyLight = numpy.empty((16, 16, 16), dtype=numpy.uint8)
+    SkyLight = np.empty((16, 16, 16), dtype=np.uint8)
     SkyLight[:] = 15
     pass
 
@@ -60,7 +60,7 @@ class FakeBrushChunk(object):
         self.dimension = world
         self.cx = cx
         self.cz = cz
-        self.Biomes = numpy.zeros((16, 16), numpy.uint8)
+        self.Biomes = np.zeros((16, 16), np.uint8)
         if biomeID:
             self.Biomes[:] = biomeID
 
@@ -98,10 +98,10 @@ class FakeBrushChunk(object):
             section = FakeBrushSection()
             section.Y = y
             if fillBlock.ID:
-                section.Blocks = numpy.array([0, fillBlock.ID], dtype=numpy.uint16)[mask.astype(numpy.uint8)]
-                section.Data = numpy.array([0, fillBlock.meta], dtype=numpy.uint8)[mask.astype(numpy.uint8)]
+                section.Blocks = np.array([0, fillBlock.ID], dtype=np.uint16)[mask.astype(np.uint8)]
+                section.Data = np.array([0, fillBlock.meta], dtype=np.uint8)[mask.astype(np.uint8)]
             else:
-                section.Blocks = numpy.array([0, NULL_ID])[mask.astype(numpy.uint8)]
+                section.Blocks = np.array([0, NULL_ID])[mask.astype(np.uint8)]
 
             sectionCache[cx, y, cz] = section
 

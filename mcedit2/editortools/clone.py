@@ -10,7 +10,7 @@ from mcedit2.command import SimpleRevisionCommand
 from mcedit2.editortools import EditorTool
 from mcedit2.imports import PendingImportNode, PendingImport
 from mcedit2.rendering.scenegraph import scenenode
-from PySide import QtGui
+from PySide6 import QtWidgets
 from mcedit2.util.showprogress import showProgress
 from mcedit2.widgets.coord_widget import CoordinateWidget
 from mcedit2.widgets.layout import Column, Row
@@ -40,7 +40,7 @@ class CloneSelectionCommand(SimpleRevisionCommand):
         super(CloneSelectionCommand, self).redo()
 
 
-class CloneOffsetCommand(QtGui.QUndoCommand):
+class CloneOffsetCommand(QtWidgets.QUndoCommand):
     def __init__(self, cloneTool, oldPoint, newPoint):
         super(CloneOffsetCommand, self).__init__()
         self.setText(cloneTool.tr("Move Cloned Object"))
@@ -55,11 +55,11 @@ class CloneOffsetCommand(QtGui.QUndoCommand):
         self.cloneTool.clonePosition = self.newPoint
 
 
-class CloneRotateCommand(QtGui.QUndoCommand):
+class CloneRotateCommand(QtWidgets.QUndoCommand):
     def __init__(self, oldRotation, newRotation, cloneTool):
         super(CloneRotateCommand, self).__init__()
         self.cloneTool = cloneTool
-        self.setText(QtGui.qApp.tr("Rotate Cloned Objects"))
+        self.setText(QtWidgets.qApp.tr("Rotate Cloned Objects"))
         self.newRotation = newRotation
         self.oldRotation = oldRotation
 
@@ -70,11 +70,11 @@ class CloneRotateCommand(QtGui.QUndoCommand):
         self.cloneTool.setRotation(self.newRotation)
 
 
-class CloneScaleCommand(QtGui.QUndoCommand):
+class CloneScaleCommand(QtWidgets.QUndoCommand):
     def __init__(self, oldScale, newScale, cloneTool):
         super(CloneScaleCommand, self).__init__()
         self.cloneTool = cloneTool
-        self.setText(QtGui.qApp.tr("Scale Cloned Objects"))
+        self.setText(QtWidgets.qApp.tr("Scale Cloned Objects"))
         self.newScale = newScale
         self.oldScale = oldScale
 
@@ -112,7 +112,7 @@ class CloneFinishCommand(SimpleRevisionCommand):
 class CloneTool(EditorTool):
     """
     Make multiple copies of the selected area. When selected, displays a preview of the
-     copies and allows the position, repeat count, and transforms to be changed.
+    copies and allows the position, repeat count, and transforms to be changed.
 
 
     Attributes
@@ -139,7 +139,7 @@ class CloneTool(EditorTool):
 
         self.overlayNode = scenenode.Node("cloneOverlay")
 
-        self.toolWidget = QtGui.QWidget()
+        self.toolWidget = QtWidgets.QWidget()
         self.pointInput = CoordinateWidget()
         self.pointInput.pointChanged.connect(self.pointInputChanged)
 
@@ -148,18 +148,18 @@ class CloneTool(EditorTool):
 
         self.scaleInput = ScaleWidget()
         self.scaleInput.scaleChanged.connect(self.scaleChanged)
-        
-        confirmButton = QtGui.QPushButton(self.tr("Confirm"))  # xxxx should be in worldview
+
+        confirmButton = QtWidgets.QPushButton(self.tr("Confirm"))  # xxxx should be in worldview
         confirmButton.clicked.connect(self.confirmClone)
 
         self.repeatCount = 1
-        self.repeatCountInput = QtGui.QSpinBox(minimum=1, maximum=10000, value=1)
+        self.repeatCountInput = QtWidgets.QSpinBox(minimum=1, maximum=10000, value=1)
         self.repeatCountInput.valueChanged.connect(self.setRepeatCount)
 
-        self.rotateRepeatsCheckbox = QtGui.QCheckBox(self.tr("Rotate Repeats"))
+        self.rotateRepeatsCheckbox = QtWidgets.QCheckBox(self.tr("Rotate Repeats"))
         self.rotateRepeatsCheckbox.toggled.connect(self.updateTiling)
 
-        self.rotateOffsetCheckbox = QtGui.QCheckBox(self.tr("Rotate Offset"))
+        self.rotateOffsetCheckbox = QtWidgets.QCheckBox(self.tr("Rotate Offset"))
         self.rotateOffsetCheckbox.toggled.connect(self.updateTiling)
 
         self.toolWidget.setLayout(Column(self.pointInput,
@@ -167,7 +167,7 @@ class CloneTool(EditorTool):
                                          Row(self.rotateRepeatsCheckbox,
                                              self.rotateOffsetCheckbox),
                                          self.scaleInput,
-                                         Row(QtGui.QLabel(self.tr("Repeat count: ")), self.repeatCountInput),
+                                         Row(QtWidgets.QLabel(self.tr("Repeat count: ")), self.repeatCountInput),
                                          confirmButton,
                                          None))
 

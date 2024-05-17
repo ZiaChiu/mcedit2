@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 import os
 
-from PySide import QtGui, QtCore
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from mcedit2.editortools.tool_settings import BrushShapeSetting
 from mcedit2.util.resources import resourcePath
@@ -16,12 +16,12 @@ from mcedit2.widgets.layout import Column
 log = logging.getLogger(__name__)
 
 
-class ShapeWidget(QtGui.QWidget):
+class ShapeWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         addShapes = kwargs.pop('addShapes', None)
         super(ShapeWidget, self).__init__(*args, **kwargs)
         buttons = self.buttons = []
-        self.groupBox = QtGui.QGroupBox("Shape:")
+        self.groupBox = QtWidgets.QGroupBox("Shape:")
 
         flowLayout = flowlayout.FlowLayout()
         actionGroup = QtGui.QActionGroup(self)
@@ -41,7 +41,7 @@ class ShapeWidget(QtGui.QWidget):
                 assert os.path.exists(filename), "%r does not exist" % filename
                 icon = QtGui.QIcon(filename)
                 if icon is None:
-                    log.warn("Failed to read shape icon file %s" % filename)
+                    log.warning("Failed to read shape icon file %s" % filename)
             else:
                 icon = None
 
@@ -51,11 +51,12 @@ class ShapeWidget(QtGui.QWidget):
                     BrushShapeSetting.setValue(shape.ID)
                     self.shapeChanged.emit(shape)
                 return handler
+
             if icon is None:
                 action = QtGui.QAction(shape.ID, self, triggered=_handler(shape))
             else:
                 action = QtGui.QAction(icon, shape.ID, self, triggered=_handler(shape))
-            button = QtGui.QToolButton()
+            button = QtWidgets.QToolButton()
             action.setCheckable(True)
             button.setDefaultAction(action)
             button.setIconSize(QtCore.QSize(32, 32))
@@ -65,7 +66,7 @@ class ShapeWidget(QtGui.QWidget):
             actions[shape.ID] = action
             shape.optionsChanged.connect(self.shapeOptionsChanged.emit)
 
-        self.optionsHolder = QtGui.QStackedWidget()
+        self.optionsHolder = QtWidgets.QStackedWidget()
         layout = Column(flowLayout, (self.optionsHolder, 1))
         self.groupBox.setLayout(layout)
         self.setLayout(Column(self.groupBox, margin=0))
@@ -96,6 +97,3 @@ class ShapeWidget(QtGui.QWidget):
         widget = newShape.getOptionsWidget()
         if widget:
             self.optionsHolder.addWidget(widget)
-
-
-

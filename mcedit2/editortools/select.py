@@ -6,7 +6,7 @@ import logging
 
 import time
 from OpenGL import GL
-from PySide import QtGui, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from mcedit2.editortools import EditorTool
 from mcedit2.editortools.brush.shapes import ChunkShape
@@ -31,7 +31,7 @@ ClassicSelectionOption = SelectionOptions.getOption("classic_selection", bool, F
 StickySelectionOption = SelectionOptions.getOption("sticky_selection", bool, False)
 
 
-class SelectionCoordinateWidget(QtGui.QWidget, Ui_selectionCoordWidget):
+class SelectionCoordinateWidget(QtWidgets.QWidget, Ui_selectionCoordWidget):
     def __init__(self, *args, **kwargs):
         super(SelectionCoordinateWidget, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -152,11 +152,11 @@ class SelectionCoordinateWidget(QtGui.QWidget, Ui_selectionCoordWidget):
         self.boxChanged.emit(box)
 
 
-class SelectCommand(QtGui.QUndoCommand):
+class SelectCommand(QtWidgets.QUndoCommand):
     def __init__(self, editorSession, box, text=None, *args, **kwargs):
-        QtGui.QUndoCommand.__init__(self, *args, **kwargs)
+        super(SelectCommand, self).__init__(*args, **kwargs)
         if text is None:
-            text = QtGui.qApp.tr("Box Selection")
+            text = QtWidgets.QApplication.instance().tr("Box Selection")
         self.setText(text)
         self.box = box
         self.editorSession = editorSession
@@ -179,15 +179,15 @@ class SelectionTool(EditorTool):
         :type editorSession: EditorSession
         """
         super(SelectionTool, self).__init__(editorSession, *args, **kwargs)
-        toolWidget = QtGui.QWidget()
+        toolWidget = QtWidgets.QWidget()
 
         editorSession.selectionChanged.connect(self.selectionDidChange)
 
         self.toolWidget = toolWidget
 
-        self.optionsButton = QtGui.QPushButton(self.tr("Options"))
+        self.optionsButton = QtWidgets.QPushButton(self.tr("Options"))
 
-        self.optionsMenu = QtGui.QMenu()
+        self.optionsMenu = QtWidgets.QMenu()
         self.optionsButton.setMenu(self.optionsMenu)
         
         classicSelectionAction = self.optionsMenu.addAction(self.tr("Classic Selection"))

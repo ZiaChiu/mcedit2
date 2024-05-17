@@ -5,9 +5,9 @@ from __future__ import absolute_import, division, print_function
 import logging
 import os
 
-from PySide import QtGui, QtCore
-from PySide.QtCore import Qt
-from PySide.QtGui import QMessageBox
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QMessageBox
 
 from mcedit2 import plugins
 from mcedit2.dialogs.error_dialog import showErrorDialog
@@ -68,9 +68,9 @@ class PluginsTableModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role=Qt.DisplayRole):
         if role != Qt.CheckStateRole:
-            return
+            return False
         if index.column() != 1:
-            return
+            return False
 
         row = index.row()
         if row >= len(self.pluginRefs):
@@ -99,8 +99,10 @@ class PluginsTableModel(QtCore.QAbstractTableModel):
         else:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
+
 def showPluginUnloadError(pluginRef):
     return showPluginLoadError(pluginRef, True)
+
 
 def showPluginLoadError(pluginRef, unloading=False):
     doing = "loading"
@@ -110,7 +112,7 @@ def showPluginLoadError(pluginRef, unloading=False):
         loadError = pluginRef.unloadError
 
     if loadError[0] == ImportError:
-        if 'pymclevel' in loadError[1].message:
+        if 'pymclevel' in loadError[1].msg:
             QMessageBox.warning(None, ("MCEdit 1.0 Filters not supported"),
                                 ("The file `{filename}` is an MCEdit 1.0 filter, which cannot be used in this version of MCEdit.\n\nRemove it from your plugins folder to avoid this error.").format(
                                     filename=os.path.basename(pluginRef.filename)
@@ -120,7 +122,8 @@ def showPluginLoadError(pluginRef, unloading=False):
     showErrorDialog("%s while %s plugin \"%s\"" % (loadError[0].__name__, doing, pluginRef.displayName),
                     loadError, fatal=False, report=False)
 
-class PluginsDialog(QtGui.QDialog, Ui_pluginsDialog):
+
+class PluginsDialog(QtWidgets.QDialog, Ui_pluginsDialog):
     def __init__(self, *args, **kwargs):
         super(PluginsDialog, self).__init__(*args, **kwargs)
         self.setupUi(self)

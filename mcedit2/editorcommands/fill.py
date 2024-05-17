@@ -2,7 +2,7 @@
     fill
 """
 from __future__ import absolute_import, division, print_function
-from PySide import QtGui
+from PySide6 import QtWidgets
 import logging
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.ui.fill import Ui_fillDialog
@@ -10,7 +10,7 @@ from mcedit2.util.showprogress import showProgress
 
 log = logging.getLogger(__name__)
 
-class FillCommandWidget(QtGui.QDialog, Ui_fillDialog):
+class FillCommandWidget(QtWidgets.QDialog, Ui_fillDialog):
     def __init__(self, editorSession):
         super(FillCommandWidget, self).__init__()
         self.setupUi(self)

@@ -4,8 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 
-from PySide import QtGui
-from PySide.QtCore import Qt
+from PySide6 import QtWidgets, QtCore
 
 from mcedit2.editortools import EditorTool
 from mcedit2.ui.editortools.select_entity import Ui_selectEntityWidget
@@ -15,10 +14,11 @@ from mceditlib.anvil.entities import EntityPtr
 log = logging.getLogger(__name__)
 
 
-class SelectEntityToolWidget(QtGui.QWidget, Ui_selectEntityWidget):
+class SelectEntityToolWidget(QtWidgets.QWidget, Ui_selectEntityWidget):
     def __init__(self, *args, **kwargs):
         super(SelectEntityToolWidget, self).__init__(*args, **kwargs)
         self.setupUi(self)
+
 
 class SelectEntityTool(EditorTool):
     name = "Inspect Entity"
@@ -62,10 +62,10 @@ class SelectEntityTool(EditorTool):
             for row, ePtr in enumerate(self.selectedEntityPtrs):
                 e = ePtr.get()
                 pos = e.Position
-                flags = Qt.ItemIsSelectable | Qt.ItemIsEnabled
-                idItem = QtGui.QTableWidgetItem(e.id)
+                flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+                idItem = QtWidgets.QTableWidgetItem(e.id)
                 idItem.setFlags(flags)
-                posItem = QtGui.QTableWidgetItem("%0.2f, %0.2f, %0.2f" % (pos[0], pos[1], pos[2]))
+                posItem = QtWidgets.QTableWidgetItem("%0.2f, %0.2f, %0.2f" % (pos[0], pos[1], pos[2]))
                 posItem.setFlags(flags)
 
                 tableWidget.setItem(row, 0, idItem)
@@ -79,7 +79,8 @@ class SelectEntityTool(EditorTool):
         else:
             self.editorSession.inspectEntity(None)
 
-def entitiesOnRay(dimension, ray, rayWidth=0.75, maxDistance = 1000):
+
+def entitiesOnRay(dimension, ray, rayWidth=0.75, maxDistance=1000):
     pos, vec = ray
 
     endpos = pos + vec.normalize() * maxDistance
@@ -97,6 +98,7 @@ def entitiesOnRay(dimension, ray, rayWidth=0.75, maxDistance = 1000):
 
     class RaySelection(object):
         positions = list(chunks(pos, endpos))
+
         def chunkPositions(self):
             return self.positions
 
@@ -108,16 +110,3 @@ def entitiesOnRay(dimension, ray, rayWidth=0.75, maxDistance = 1000):
     sr = RaySelection()
 
     return dimension.getEntities(sr)
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -3,7 +3,7 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
-from PySide import QtGui, QtCore
+from PySide6 import QtGui, QtCore
 import numpy
 from mcedit2.widgets.layout import Column
 from mceditlib import selection
@@ -36,7 +36,7 @@ class BrushShape(QtCore.QObject):
     ID = NotImplemented
     icon = NotImplemented
     optionsChanged = QtCore.Signal()
-    
+
     def createShapedSelection(self, box, dimension):
         """
         Return a SelectionBox that selects the blocks inside this shape.

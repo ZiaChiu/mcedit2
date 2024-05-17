@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from PySide import QtGui
+from PySide6 import QtWidgets
 
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.editortools import EditorTool
@@ -43,11 +43,11 @@ class MoveSelectionCommand(SimpleRevisionCommand):
         super(MoveSelectionCommand, self).redo()
 
 
-class MoveOffsetCommand(QtGui.QUndoCommand):
+class MoveOffsetCommand(QtWidgets.QUndoCommand):
     def __init__(self, oldPoint, newPoint, pendingImport):
         super(MoveOffsetCommand, self).__init__()
         self.pendingImport = pendingImport
-        self.setText(QtGui.qApp.tr("Move Object"))
+        self.setText(QtWidgets.QApplication.instance().tr("Move Object"))
         self.newPoint = newPoint
         self.oldPoint = oldPoint
 
@@ -58,11 +58,11 @@ class MoveOffsetCommand(QtGui.QUndoCommand):
         self.pendingImport.basePosition = self.newPoint
 
 
-class MoveRotateCommand(QtGui.QUndoCommand):
+class MoveRotateCommand(QtWidgets.QUndoCommand):
     def __init__(self, oldRotation, newRotation, pendingImport):
         super(MoveRotateCommand, self).__init__()
         self.pendingImport = pendingImport
-        self.setText(QtGui.qApp.tr("Rotate Object"))
+        self.setText(QtWidgets.QApplication.instance().tr("Rotate Object"))
         self.newRotation = newRotation
         self.oldRotation = oldRotation
 
@@ -73,11 +73,11 @@ class MoveRotateCommand(QtGui.QUndoCommand):
         self.pendingImport.rotation = self.newRotation
 
 
-class MoveScaleCommand(QtGui.QUndoCommand):
+class MoveScaleCommand(QtWidgets.QUndoCommand):
     def __init__(self, oldScale, newScale, pendingImport):
         super(MoveScaleCommand, self).__init__()
         self.pendingImport = pendingImport
-        self.setText(QtGui.qApp.tr("Scale Object"))
+        self.setText(QtWidgets.QApplication.instance().tr("Scale Object"))
         self.newScale = newScale
         self.oldScale = oldScale
 
@@ -122,7 +122,7 @@ class MoveTool(EditorTool):
         self._currentImport = None
         self._currentImportNode = None
 
-        self.toolWidget = QtGui.QWidget()
+        self.toolWidget = QtWidgets.QWidget()
 
         self.pointInput = CoordinateWidget()
         self.pointInput.pointChanged.connect(self.pointInputChanged)
@@ -133,12 +133,12 @@ class MoveTool(EditorTool):
         self.scaleInput = ScaleWidget()
         self.scaleInput.scaleChanged.connect(self.scaleChanged)
 
-        self.copyOptionsWidget = QtGui.QGroupBox(self.tr("Options"))
+        self.copyOptionsWidget = QtWidgets.QGroupBox(self.tr("Options"))
 
-        self.copyAirCheckbox = QtGui.QCheckBox(self.tr("Copy Air"))
+        self.copyAirCheckbox = QtWidgets.QCheckBox(self.tr("Copy Air"))
         self.copyOptionsWidget.setLayout(Column(self.copyAirCheckbox))
 
-        confirmButton = QtGui.QPushButton("Confirm")  # xxxx should be in worldview
+        confirmButton = QtWidgets.QPushButton("Confirm")  # xxxx should be in worldview
         confirmButton.clicked.connect(self.confirmImport)
         self.toolWidget.setLayout(Column(self.pointInput,
                                          self.rotationInput,

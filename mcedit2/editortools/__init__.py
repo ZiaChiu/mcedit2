@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import os
 
-from PySide import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from mceditlib.util.lazyprop import weakrefprop
 from mcedit2.util.resources import resourcePath
@@ -126,6 +126,7 @@ class EditorTool(QtCore.QObject):
             return
         self.toolPicked.emit(self.name)
 
+    @property
     def pickToolAction(self):
         name = self.name
         iconName = self.iconName
@@ -138,11 +139,11 @@ class EditorTool(QtCore.QObject):
                 icon = QtGui.QIcon(iconPath)
         else:
             icon = None
-
+        # xxxx coordinate with view movement keys
         action = QtGui.QAction(
             self.tr(name),
             self,
-            #shortcut=self.toolShortcut(name),  # xxxx coordinate with view movement keys
+            #shortcut=self.toolShortcut(name),
             triggered=self.pick,
             checkable=True,
             icon=icon,
@@ -151,4 +152,3 @@ class EditorTool(QtCore.QObject):
         action.toolName = name
 
         return action
-

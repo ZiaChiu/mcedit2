@@ -4,7 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 
-from PySide import QtCore, QtGui
+from PySide6 import QtCore, QtWidgets
 
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.ui.find_replace_blocks import Ui_FindReplaceBlocks
@@ -16,7 +16,7 @@ from mcedit2.widgets.layout import Row
 log = logging.getLogger(__name__)
 
 
-class FindReplaceBlocksWidget(QtGui.QWidget, Ui_FindReplaceBlocks):
+class FindReplaceBlocksWidget(QtWidgets.QWidget, Ui_FindReplaceBlocks):
     def __init__(self):
         super(FindReplaceBlocksWidget, self).__init__()
         self.setupUi(self)

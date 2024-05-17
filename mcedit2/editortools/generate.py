@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import traceback
 
-from PySide import QtCore, QtGui
+from PySide6 import QtCore, QtWidgets
 
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.editortools import EditorTool
@@ -106,7 +106,7 @@ class GeneratePlugin(QtCore.QObject):
         Options panel while this GeneratePlugin is chosen.
 
         :return:
-        :rtype: QtGui.QWidget
+        :rtype: QtWidgets.QWidget
         """
         raise NotImplementedError
 
@@ -155,7 +155,7 @@ class GenerateTool(EditorTool):
         self.blockPreview = False
         self.glPreview = True
 
-        toolWidget = QtGui.QWidget()
+        toolWidget = QtWidgets.QWidget()
 
         self.toolWidget = toolWidget
 
@@ -165,27 +165,27 @@ class GenerateTool(EditorTool):
         if len(self.generatorTypes):
             self.currentGenerator = self.generatorTypes[0]
 
-        self.generatorTypeInput = QtGui.QComboBox()
+        self.generatorTypeInput = QtWidgets.QComboBox()
         self.generatorTypesChanged()
 
         self.generatorTypeInput.currentIndexChanged.connect(self.currentTypeChanged)
 
-        self.livePreviewCheckbox = QtGui.QCheckBox("Live Preview")
+        self.livePreviewCheckbox = QtWidgets.QCheckBox("Live Preview")
         self.livePreviewCheckbox.setChecked(self.livePreview)
         self.livePreviewCheckbox.toggled.connect(self.livePreviewToggled)
 
-        self.blockPreviewCheckbox = QtGui.QCheckBox("Block Preview")
+        self.blockPreviewCheckbox = QtWidgets.QCheckBox("Block Preview")
         self.blockPreviewCheckbox.setChecked(self.blockPreview)
         self.blockPreviewCheckbox.toggled.connect(self.blockPreviewToggled)
 
-        self.glPreviewCheckbox = QtGui.QCheckBox("GL Preview")
+        self.glPreviewCheckbox = QtWidgets.QCheckBox("GL Preview")
         self.glPreviewCheckbox.setChecked(self.glPreview)
         self.glPreviewCheckbox.toggled.connect(self.glPreviewToggled)
 
-        self.optionsHolder = QtGui.QStackedWidget()
-        self.optionsHolder.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        self.optionsHolder = QtWidgets.QStackedWidget()
+        self.optionsHolder.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
 
-        self.generateButton = QtGui.QPushButton(self.tr("Generate"))
+        self.generateButton = QtWidgets.QPushButton(self.tr("Generate"))
         self.generateButton.clicked.connect(self.generateClicked)
 
         column.append(self.generatorTypeInput)
@@ -382,9 +382,9 @@ class GenerateTool(EditorTool):
             self.displaySchematic(schematic, bounds.origin)
         except Exception as e:
             log.exception("Error while running generator %s: %s", self.currentGenerator, e)
-            QtGui.QMessageBox.warning(QtGui.qApp.mainWindow, "Error while running generator",
-                                      "An error occurred while running the generator: \n  %s.\n\n"
-                                      "Traceback: %s" % (e, traceback.format_exc()))
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.instance().activeWindow(), "Error while running generator",
+                                          "An error occurred while running the generator: \n  %s.\n\n"
+                                          "Traceback: %s" % (e, traceback.format_exc()))
             self.livePreview = False
 
     def displaySchematic(self, schematic, offset):

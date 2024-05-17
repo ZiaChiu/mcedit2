@@ -5,19 +5,18 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from PySide import QtGui
+from PySide6 import QtWidgets
 
 from mcedit2.editorcommands.find_replace.command_text import FindReplaceCommandText
 from mcedit2.editorcommands.find_replace.replace_blocks import FindReplaceBlocks
 from mcedit2.editorcommands.find_replace.nbt import FindReplaceNBT
 from mcedit2.ui.find_replace import Ui_findReplaceDialog
-from mcedit2.util.load_ui import load_ui
 from mcedit2.widgets.layout import Column
 
 log = logging.getLogger(__name__)
 
 
-class FindReplaceDialog(QtGui.QDialog, Ui_findReplaceDialog):
+class FindReplaceDialog(QtWidgets.QDialog, Ui_findReplaceDialog):
     def __init__(self, editorSession, *args, **kwargs):
         super(FindReplaceDialog, self).__init__(*args, **kwargs)
         self.editorSession = editorSession
@@ -61,6 +60,3 @@ class FindReplaceDialog(QtGui.QDialog, Ui_findReplaceDialog):
         self.findReplaceNBT.dialogOpened()
         # self.findReplaceBlocks.dialogOpened()
         super(FindReplaceDialog, self).exec_()
-
-
-

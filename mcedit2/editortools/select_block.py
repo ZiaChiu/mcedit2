@@ -4,16 +4,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 
-from PySide import QtGui
+from PySide6 import QtWidgets
 
 from mcedit2.editortools import EditorTool
 from mcedit2.ui.editortools.select_block import Ui_selectBlockWidget
 
-
 log = logging.getLogger(__name__)
 
 
-class SelectBlockToolWidget(QtGui.QWidget, Ui_selectBlockWidget):
+class SelectBlockToolWidget(QtWidgets.QWidget, Ui_selectBlockWidget):
     def __init__(self, *args, **kwargs):
         super(SelectBlockToolWidget, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -39,12 +38,3 @@ class SelectBlockTool(EditorTool):
     def setMousePos(self, pos):
         self.mousePos = pos
         self.editorSession.inspectBlock(pos)
-
-
-
-
-
-
-
-
-

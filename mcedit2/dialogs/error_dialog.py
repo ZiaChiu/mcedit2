@@ -7,7 +7,7 @@ import traceback
 import sys
 import platform
 
-from PySide import QtGui, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from mcedit2.sentry import get_sentry_client
 from mcedit2.ui.dialogs.error_dialog import Ui_errorDialog
@@ -31,16 +31,16 @@ def showErrorDialog(text, tb=None, fatal=True, report=True):
     if tb is None:
         tb = sys.exc_info()
     _errorShown = True
-    grabber = QtGui.QWidget.mouseGrabber()
+    grabber = QtWidgets.QWidget.mouseGrabber()
     if grabber:
         grabber.releaseMouse()
-        
+
     dialog = ErrorDialog(text, tb, fatal, report)
     dialog.exec_()
     _errorShown = False
 
 
-class ErrorDialog(QtGui.QDialog, Ui_errorDialog):
+class ErrorDialog(QtWidgets.QDialog, Ui_errorDialog):
     """
     A dialog for displaying an error traceback when something goes wrong.
 
@@ -117,19 +117,18 @@ class ErrorDialog(QtGui.QDialog, Ui_errorDialog):
         url = None
 
         progressText = self.tr("Uploading to pastebin...")
-        dialog = MCEProgressDialog(progressText,
-                                         None, 0, 0, self)
+        dialog = MCEProgressDialog(progressText, None, 0, 0, self)
         dialog.setLabelText(progressText)
         dialog.setWindowTitle(progressText)
         dialog.setStatusTip(progressText)
 
         dialog.show()
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
         try:
             url = Pastebin.paste(api_dev_key, self.errorText,
                                  paste_expire_date="1M")
         except Exception as e:
-            log.warn("Failed to upload to pastebin!", exc_info=1)
+            log.warning("Failed to upload to pastebin!", exc_info=1)
             self.copyToPastebinLabel.setText(self.tr("Failed to upload to pastebin: ") + str(e))
             if e.message.startswith("https://pastebin.com"):
                 url = e.message
@@ -138,7 +137,7 @@ class ErrorDialog(QtGui.QDialog, Ui_errorDialog):
 
         if url:
             self.pastebinURLBox.setText(url)
-            QtGui.QApplication.clipboard().setText(url)
+            QtWidgets.QApplication.clipboard().setText(url)
             self.copyToPastebinLabel.setText(self.tr("Pastebin URL copied to clipboard!"))
 
     def restartMCEdit(self):
@@ -163,10 +162,9 @@ class ErrorDialog(QtGui.QDialog, Ui_errorDialog):
 
     def reportErrorToggled(self, checked):
         ReportErrorSetting.setValue(checked)
-        
+
         page = 0 if checked else 1
         self.reportingLabelStack.setCurrentIndex(page)
-
 
     def debugPdb(self):
         import pdb; pdb.post_mortem(self.exc_info[2])
