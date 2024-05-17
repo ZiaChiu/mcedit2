@@ -85,7 +85,7 @@ def LineArcNode(p1, p2, color):
 def CommandVisuals(pos, commandObj):
     visualCls = _visualClasses.get(commandObj.name)
     if visualCls is None:
-        log.warn("No command found for %s", commandObj.name)
+        log.warning("No command found for %s", commandObj.name)
         return Node("nullCommandVisuals")
     else:
         return visualCls(pos, commandObj)
@@ -251,7 +251,7 @@ class ExecuteVisuals(Node):
         selectorPos = [selector.getArg(a) for a in 'xyz']
 
         if None in (selectorPos):
-            log.warn("No selector coordinates for command %s", commandObj)
+            log.warning("No selector coordinates for command %s", commandObj)
             targetPos = commandObj.resolvePosition((0, 0, 0))
         else:
             targetPos = commandObj.resolvePosition(selectorPos)
@@ -291,4 +291,3 @@ class ExecuteVisuals(Node):
         if not isinstance(commandObj.subcommand, UnknownCommand):
             subvisuals = CommandVisuals(targetPos, commandObj.subcommand)
             self.addChild(subvisuals)
-
