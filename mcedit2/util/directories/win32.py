@@ -20,7 +20,16 @@ import sys
 from mcedit2.util import resources
 
 _userFilesDirectory = None
+
+
 def getUserFilesDirectory():
+    """
+    Get the directory where user files are stored. This varies based on whether the application
+    is run from a source checkout or a frozen build (e.g., packaged executable).
+
+    Returns:
+        str: The path to the user files directory.
+    """
     global _userFilesDirectory
     if _userFilesDirectory is not None:
         return _userFilesDirectory
@@ -39,13 +48,22 @@ def getUserFilesDirectory():
         # We take care not to store filenames as `bytes`, as this causes the filesystem functions
         # to use the legacy codepage APIs.
 
-        import win32api
-        exe = win32api.GetModuleFileNameW(None)
-        assert os.path.exists(exe), "MCEdit executable %r does not exist! Something is very wrong." % exe
-        folder = os.path.dirname(exe)
-        dataDir = os.path.join(folder, "MCEdit 2 Files")
-
+        # Running from a frozen build
+        if sys.platform == "win32":
+            import ctypes
+            buffer = ctypes.create_unicode_buffer(260)
+            ctypes.windll.kernel32.GetModuleFileNameW(None, buffer, 260)
+            exe = buffer.value
+            assert os.path.exists(exe), f"MCEdit executable {exe} does not exist! Something is very wrong."
+            folder = os.path.dirname(exe)
+            dataDir = os.path.join(folder, "MCEdit 2 Files")
+        else:
+            # For other platforms, assuming similar structure for frozen builds
+            exe = sys.executable
+            folder = os.path.dirname(exe)
+            dataDir = os.path.join(folder, "MCEdit 2 Files")
     else:
+        # Running from source
         folder = os.path.dirname(resources.getSrcFolder())
         dataDir = os.path.join(folder, "MCEdit 2 Files")
 
