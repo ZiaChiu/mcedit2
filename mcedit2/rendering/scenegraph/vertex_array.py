@@ -114,7 +114,10 @@ class VertexNode(Node):
 
         Parameters
         ----------
-        vertexArrays : Union[List[mcedit2.rendering.vertexarraybuffer.QuadVertexArrayBuffer], mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer]
+        vertexArrays : Union[
+        List[mcedit2.rendering.vertexarraybuffer.QuadVertexArrayBuffer],
+                        mcedit2.rendering.vertexarraybuffer.VertexArrayBuffer
+                        ]
         """
         super(VertexNode, self).__init__()
         if not isinstance(vertexArrays, (list, tuple)):
