@@ -4,10 +4,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 import itertools
-from PySide import QtOpenGL
+from PySide6 import QtOpenGL
 
 from OpenGL import GL
-import numpy
+import numpy as np
 
 from mcedit2.util.load_png import loadPNGData
 from mcedit2.rendering.lightmap import generateLightmap
@@ -20,7 +20,7 @@ from mceditlib import util
 log = logging.getLogger(__name__)
 
 
-class TextureSlot(object):
+class TextureSlot:
     def __init__(self, left, top, right, bottom):
         self.left = left
         self.top = top
@@ -54,7 +54,7 @@ def allTextureNames(blocktypes):
         yield b.internalName
 
 
-class TextureAtlas(object):
+class TextureAtlas:
 
     def __init__(self, world, resourceLoader, blockModels, maxLOD=0, overrideMaxSize=None):
         """
@@ -109,7 +109,7 @@ class TextureAtlas(object):
         rawSize = sum(a.nbytes for (n, w, h, a) in rawTextures)
 
         log.info("Preloaded %d textures for world %s (%i kB)",
-                 len(self._rawTextures), util.displayName(self._filename), rawSize/1024)
+                 len(self._rawTextures), util.displayName(self._filename), rawSize / 1024)
 
         self.textureData = None
         self.texCoordsByName = {}
@@ -136,7 +136,7 @@ class TextureAtlas(object):
         slots = []
         atlasWidth = 0
         atlasHeight = 0
-        self._rawTextures.sort(key=lambda (_, w, h, __): max(w, h), reverse=True)
+        self._rawTextures.sort(key=lambda item: max(item[1], item[2]), reverse=True)
 
         for path, w, h, data in self._rawTextures:
             w += borderSize * 2
@@ -168,7 +168,7 @@ class TextureAtlas(object):
         self.width = atlasWidth
         self.height = atlasHeight
 
-        self.textureData = texData = numpy.zeros((atlasHeight, atlasWidth, 4), dtype='uint8')
+        self.textureData = texData = np.zeros((atlasHeight, atlasWidth, 4), dtype='uint8')
         self.textureData[:] = [0xff, 0x0, 0xff, 0xff]
         b = borderSize
         for slot in slots:
@@ -224,7 +224,7 @@ class TextureAtlas(object):
     def _openImageStream(self, name):
         if name == "MCEDIT_UNKNOWN":
             block_unknown = resourcePath("mcedit2/assets/mcedit2/block_unknown.png")
-            return file(block_unknown, "rb")
+            return open(block_unknown, "rb")
         return self.resourceLoader.openStream(name)
 
     def bindTerrain(self):
@@ -294,7 +294,7 @@ class LightTexture(glutils.Texture):
     @property
     def dayTime(self):
         return self._dayTime
-    
+
     @dayTime.setter
     def dayTime(self, value):
         self._dayTime = value
@@ -303,7 +303,7 @@ class LightTexture(glutils.Texture):
     @property
     def minBrightness(self):
         return self._minBrightness
-    
+
     @minBrightness.setter
     def minBrightness(self, value):
         self._minBrightness = value
@@ -320,23 +320,24 @@ class LightTexture(glutils.Texture):
 
     def updateLightmap(self):
         self.image = self.generateImage()
-        
+
 
 _maxSize = None
 
 def getGLMaximumTextureSize():
     global _maxSize
-    if _maxSize == None:
+    if _maxSize is None:
         _maxSize = _getMaxSize()
     return _maxSize
 
 def _getMaxSize():
-    if QtOpenGL.QGLContext.currentContext() is None:
-        pbuf = QtOpenGL.QGLPixelBuffer(100, 100)
-        pbuf.makeCurrent()
+    if QtOpenGL.QOpenGLContext.currentContext() is None:
+        pbuf = QtOpenGL.QOpenGLBuffer(QtOpenGL.QOpenGLBuffer.PixelPackBuffer)
+        pbuf.create()
+        pbuf.bind()
     size = 16384
     while size > 0:
-        size /= 2
+        size //= 2
         GL.glTexImage2D(GL.GL_PROXY_TEXTURE_2D, 0, GL.GL_RGBA, size, size, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, None)
         maxsize = GL.glGetTexLevelParameteriv(GL.GL_PROXY_TEXTURE_2D, 0, GL.GL_TEXTURE_WIDTH)
 
