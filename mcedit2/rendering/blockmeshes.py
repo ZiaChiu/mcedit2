@@ -70,10 +70,10 @@ def makeVertexTemplates(xmin=0, ymin=0, zmin=0, xmax=1, ymax=1, zmax=1):
          (xmin, ymax, zmin, zmin, ymax)],
 
         # FaceYIncreasing:
-        [(xmin, ymax, zmin, xmin, 1 - zmax), # ne
-         (xmin, ymax, zmax, xmin, 1 - zmin), # nw
-         (xmax, ymax, zmax, xmax, 1 - zmin), # sw
-         (xmax, ymax, zmin, xmax, 1 - zmax)], # se
+        [(xmin, ymax, zmin, xmin, 1 - zmax),  # ne
+         (xmin, ymax, zmax, xmin, 1 - zmin),  # nw
+         (xmax, ymax, zmax, xmax, 1 - zmin),  # sw
+         (xmax, ymax, zmin, xmax, 1 - zmax)],  # se
 
         # FaceYDecreasing:
         [(xmin, ymin, zmin, xmin, 1 - zmax),
@@ -93,6 +93,7 @@ def makeVertexTemplates(xmin=0, ymin=0, zmin=0, xmax=1, ymax=1, zmax=1):
          (xmin, ymax, zmin, xmax, ymax),
          (xmax, ymax, zmin, xmin, ymax)],
     ])
+
 
 standardCubeTemplates = makeVertexTemplates()
 
