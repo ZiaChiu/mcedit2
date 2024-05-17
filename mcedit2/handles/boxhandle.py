@@ -1,10 +1,7 @@
-"""
-    boxhandle
-"""
 from __future__ import absolute_import, division, print_function
 import logging
 
-from PySide import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 import numpy
 
 from mcedit2.rendering.scenegraph import scenenode
@@ -87,7 +84,7 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
         if box != self.boxNode.selectionBox:
             self.boxNode.selectionBox = box
             self.faceDragNode.selectionBox = box
-    
+
     def changeBounds(self, box):
         # Call in response to user input, but not programmatic bounds change
         self.bounds = box
@@ -104,7 +101,6 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
     def resizable(self, value):
         assert value or self.bounds, "Sanity check: Non-resizable BoxHandle must have bounds."
         self._resizable = value
-
     # --- Resize helpers ---
 
     def dragResizePoint(self, ray):
@@ -147,12 +143,10 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
 
         Parameters
         ----------
-
         ray: mcedit2.util.geometry.Ray
 
         Returns
         -------
-
         box: BoundingBox
         """
         point = self.dragStartPoint
@@ -165,7 +159,7 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
             ray = event.ray
             dim = face >> 1
             size[dim] = 0
-            s = [0,0,0]
+            s = [0, 0, 0]
 
             if face & 1 == 0:
                 s[dim] = 1
@@ -177,7 +171,6 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
         endBox = BoundingBox(endPoint.intfloor(), size)
 
         return startBox.union(endBox)
-
     # --- Resize ---
 
     def beginResize(self, event):
@@ -190,7 +183,7 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
             # Try not to pick a dimension close to edge-on with the view vector
             dim = ((face.dimension + 1) % 3)
 
-            dim1 = (dim+1) % 3
+            dim1 = (dim + 1) % 3
 
             vector = event.view.cameraVector.abs()
             if vector[dim1] > vector[dim]:
@@ -255,9 +248,7 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
 
         self.bounds = newBox
         self.boundsChangedDone.emit(newBox, None)
-
     # --- Move helpers ---
-
 
     def dragMovePoint(self, ray):
         """
@@ -384,5 +375,3 @@ class BoxHandle(scenenode.Node, QtCore.QObject):
 
             elif self.isResizing:
                 self.endResize(event)
-
-

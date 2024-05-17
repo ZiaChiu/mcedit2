@@ -1,10 +1,7 @@
-"""
-    map
-"""
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 import logging
-from PySide import QtGui, QtCore
-from PySide.QtCore import Qt
+from PySide6 import QtGui, QtCore
+from PySide6.QtCore import Qt
 import numpy
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.ui.import_map import Ui_importMapDialog
@@ -64,7 +61,6 @@ def rgbaToBgra(colors):
     return numpy.ascontiguousarray(numpy.roll(colors, 1, -1)[..., ::-1])
 
 bgraToRgba = rgbaToBgra
-
 class MapPanel(QtGui.QWidget, Ui_mapWidget):
     def __init__(self, editorSession):
         """
@@ -185,7 +181,7 @@ class MapPanel(QtGui.QWidget, Ui_mapWidget):
                     command = MapImportCommand(self.editorSession, self.tr("Import Image as Map"))
                     with command.begin():
                         for x, y, image in convertedImages:
-                            colors = numpy.fromstring(image.bits(), dtype=numpy.uint8)
+                            colors = numpy.frombuffer(image.bits(), dtype=numpy.uint8)
                             colors.shape = 128, 128
                             newMap = self.editorSession.worldEditor.createMap()
                             newMap.colors[:] = colors
@@ -211,8 +207,6 @@ class MapPanel(QtGui.QWidget, Ui_mapWidget):
 
 class MapImportCommand(SimpleRevisionCommand):
     pass
-
-
 class ImportMapDialog(QtGui.QDialog, Ui_importMapDialog):
     def __init__(self, imageFilename, colorTable):
         super(ImportMapDialog, self).__init__()

@@ -12,9 +12,9 @@ import numpy
 import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
 
+versionFile = open("version.txt")
 
-with file("version.txt") as f:
-    version = f.read().strip()
+version = versionFile.read().strip()
 
 install_requires = [
     "numpy",
