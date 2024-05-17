@@ -42,6 +42,6 @@ class DepthOffset(states.SceneNodeState):
     def exit(self):
         GL.glPopAttrib()
 
-    def __init__(self, depthOffset):
+    def __init__(self, depth_off_set):
         super(DepthOffset, self).__init__()
-        self.depthOffset = depthOffset
+        self.depthOffset = depth_off_set
