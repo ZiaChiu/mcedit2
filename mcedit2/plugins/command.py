@@ -1,11 +1,8 @@
-"""
-    command
-"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 from collections import defaultdict
 
-from PySide import QtCore, QtGui
+from PySide6 import QtCore, QtWidgets
 
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.dialogs.error_dialog import showErrorDialog
@@ -86,8 +83,8 @@ class SimpleCommandPlugin(CommandPlugin):
 
     def showDialog(self):
         dialog = SimpleOptionsDialog(self.displayName, self.options, self.editorSession)
-        result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        result = dialog.exec()
+        if result == QtWidgets.QDialog.Accepted:
             command = SimpleRevisionCommand(self.editorSession, self.displayName)
             with self.editorSession.beginCommand(command):
                 result = self.perform(self.editorSession.currentDimension,
@@ -98,7 +95,7 @@ class SimpleCommandPlugin(CommandPlugin):
 
     def perform(self, dimension, selection, options):
         """
-        
+
         Parameters
         ----------
         dimension : mceditlib.worldeditor.WorldEditorDimension
@@ -112,7 +109,7 @@ class SimpleCommandPlugin(CommandPlugin):
         raise NotImplementedError
 
 
-class SimpleOptionsDialog(QtGui.QDialog):
+class SimpleOptionsDialog(QtWidgets.QDialog):
     def __init__(self, title, options, editorSession):
         super(SimpleOptionsDialog, self).__init__()
         self.setWindowTitle(title)
@@ -120,19 +117,19 @@ class SimpleOptionsDialog(QtGui.QDialog):
         self.editorSession = editorSession
         self.optIdx = 0
 
-        self.optionsArea = QtGui.QScrollArea()
+        self.optionsArea = QtWidgets.QScrollArea()
         self.optionsArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.optionsArea.setMinimumHeight(600)
         # self.optionsArea.setMinimumSize(500, 750)
-        self.buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        self.buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
         self.setLayout(Column(self.optionsArea, self.buttonBox))
-        self.containerWidget = QtGui.QWidget()
+        self.containerWidget = QtWidgets.QWidget()
         self.containerWidget.setMinimumWidth(400)
 
-        self.formLayout = QtGui.QFormLayout()
+        self.formLayout = QtWidgets.QFormLayout()
         self.valueGetters = {}
         self.widgets = []
 
@@ -149,10 +146,9 @@ class SimpleOptionsDialog(QtGui.QDialog):
         self.containerWidget.setLayout(self.formLayout)
         self.optionsArea.setWidget(self.containerWidget)
 
-
     def getOptions(self):
         values = {}
-        for k, v in self.valueGetters.iteritems():
+        for k, v in self.valueGetters.items():
             values[k] = v()
 
         return values
@@ -161,7 +157,7 @@ class SimpleOptionsDialog(QtGui.QDialog):
         self.optIdx += 1
 
         type = optDict.get('type')
-        if type is None or not isinstance(type, basestring):
+        if type is None or not isinstance(type, str):
             raise ValueError("Option dict must have 'type' key")
 
         if type in ('int', 'float'):
@@ -170,7 +166,7 @@ class SimpleOptionsDialog(QtGui.QDialog):
 
             value = optDict.get('value', 0)
             increment = optDict.get('increment', None)
-            
+
             name = optDict.get('name', None)
             if name is None:
                 raise ValueError("Option dict must have 'name' key")
@@ -178,9 +174,9 @@ class SimpleOptionsDialog(QtGui.QDialog):
             text = optDict.get('text', "Option %d" % self.optIdx)
             if minimum is None or maximum is None:
                 if type == 'float':
-                    widget = QtGui.QDoubleSpinBox(value=value)
+                    widget = QtWidgets.QDoubleSpinBox(value=value)
                 else:
-                    widget = QtGui.QSpinBox(value=value)
+                    widget = QtWidgets.QSpinBox(value=value)
                 if minimum is not None:
                     widget.setMinimum(minimum)
                 else:
@@ -189,11 +185,12 @@ class SimpleOptionsDialog(QtGui.QDialog):
                     widget.setMaximum(maximum)
                 else:
                     widget.setMaximum(2000000000)
-                
+
                 if increment is not None:
                     widget.setSingleStep(increment)
             else:
-                widget = SpinSlider(double=(type == 'float'), minimum=minimum, maximum=maximum, value=value, increment=increment)
+                widget = SpinSlider(double=(type == 'float'), minimum=minimum, maximum=maximum, value=value,
+                                    increment=increment)
 
             self.widgets.append(widget)
 
@@ -207,7 +204,7 @@ class SimpleOptionsDialog(QtGui.QDialog):
                 raise ValueError("Option dict must have 'name' key")
 
             text = optDict.get('text', "Option %d" % self.optIdx)
-            widget = QtGui.QCheckBox()
+            widget = QtWidgets.QCheckBox()
             widget.setChecked(value)
             self.widgets.append(widget)
 
@@ -223,7 +220,7 @@ class SimpleOptionsDialog(QtGui.QDialog):
                 raise ValueError("Option dict must have 'name' key")
 
             text = optDict.get('text', "Option %d" % self.optIdx)
-            widget = QtGui.QLineEdit()
+            widget = QtWidgets.QLineEdit()
             self.widgets.append(widget)
             if placeholder:
                 widget.setPlaceholderText(placeholder)
@@ -242,7 +239,7 @@ class SimpleOptionsDialog(QtGui.QDialog):
             choices = optDict.get('choices', [])
 
             text = optDict.get('text', "Option %d" % self.optIdx)
-            widget = QtGui.QComboBox()
+            widget = QtWidgets.QComboBox()
             self.widgets.append(widget)
 
             for label, key in choices:
@@ -279,22 +276,23 @@ class SimpleOptionsDialog(QtGui.QDialog):
             text = optDict.get('text', None)
             if not text:
                 raise ValueError("Option dict for type 'label' must have 'text' key.")
-            widget = QtGui.QLabel(text, wordWrap=True)
+            widget = QtWidgets.QLabel(text, wordWrap=True)
             self.widgets.append(widget)
 
             self.formLayout.addRow("", widget)
 
         elif type == 'nbt':
-            widget = QtGui.QLabel("Not Implemented")
+            widget = QtWidgets.QLabel("Not Implemented")
             self.widgets.append(widget)
 
             self.formLayout.addRow("NBT Option: ", widget)
         else:
             raise ValueError("Unknown type %s for option dict" % type)
-        
+
 
 def optionsFromFilterInputs(inputs):
     return [dictFromFilterTuple(opt) for opt in inputs]
+
 
 def dictFromFilterTuple(opt):
     """
@@ -309,18 +307,17 @@ def dictFromFilterTuple(opt):
     optDict : dict
     """
     name, value = opt
-    
+
     min = max = increment = None
 
     option = dict(name=name,
                   text=name)
-    
+
     if isinstance(value, tuple):
         if not len(value):
             raise ValueError("Filter option value must have nonzero length.")
-        
 
-        if isinstance(value[0], basestring):
+        if isinstance(value[0], str):
             if value[0] == "block":
                 # blocktype input
                 option["type"] = "blocktype"
@@ -340,7 +337,7 @@ def dictFromFilterTuple(opt):
                 option['choices'] = [(v, v) for v in value]
                 option["type"] = "choice"
                 value = None
-        
+
         if isinstance(value[0], (int, float)):
             if len(value) == 2:
                 min, max = value
@@ -349,14 +346,14 @@ def dictFromFilterTuple(opt):
                 value, min, max = value
             if len(value) == 4:
                 value, min, max, increment = value
-                
+
     if min is not None:
         option["min"] = min
     if max is not None:
         option["max"] = max
     if increment is not None:
         option["increment"] = increment
-            
+
     if value == "label":
         option["type"] = "label"
         return option
@@ -364,15 +361,15 @@ def dictFromFilterTuple(opt):
     elif value == "blocktype":
         option["type"] = "blocktype"
         option["value"] = "minecraft:stone"
-    
+
     elif value == "string":
         option["type"] = "text"
         option["value"] = ""
-    
-    elif isinstance(value, basestring):
+
+    elif isinstance(value, str):
         option["type"] = "text"
         option["value"] = value
-    
+
     elif isinstance(value, int):
         option["type"] = "int"
         option["value"] = value
@@ -380,30 +377,31 @@ def dictFromFilterTuple(opt):
     elif isinstance(value, float):
         option["type"] = "float"
         option["value"] = value
-    
+
     elif isinstance(value, bool):
         option['type'] = 'bool'
         option['value'] = bool
-    
+
     elif isinstance(value, BlockType):
         option["type"] = "blocktype"
         option["value"] = value
-        
+
     if "value" in option:
         return option
     else:
         return dict(type="label",
                     name=name,
                     text="Unknown filter option: %s" % (opt,))
-        
+
 
 class _CommandPlugins(PluginClassRegistry):
     pluginClass = CommandPlugin
 
+
 CommandPlugins = _CommandPlugins()
 
 
-class PluginsMenu(QtGui.QMenu):
+class PluginsMenu(QtWidgets.QMenu):
     def __init__(self, editorSession):
         super(PluginsMenu, self).__init__()
         self.setTitle(self.tr("Plugins"))
@@ -427,7 +425,7 @@ class PluginsMenu(QtGui.QMenu):
             msg = "Error while instantiating plugin class %s" % (cls,)
             log.exception(msg)
             showErrorDialog(msg, fatal=False)
-            
+
     def pluginRemoved(self, cls):
         self.plugins = [p for p in self.plugins if not isinstance(p, cls)]
 
@@ -440,7 +438,7 @@ class PluginsMenu(QtGui.QMenu):
         log.info("Adding menu item for cls %s text %s func %s", cls, text, func)
         if submenu is not None:
             if submenu not in self.submenus:
-                menu = self.menuPlugins.addMenu(submenu)
+                menu = self.addMenu(submenu)
                 self.submenus[submenu] = menu
             else:
                 menu = self.submenus[submenu]
