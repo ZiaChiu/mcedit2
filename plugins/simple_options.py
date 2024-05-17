@@ -3,7 +3,7 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from PySide import QtGui
+from PySide6 import QtWidgets
 
 from mcedit2.plugins import registerPluginCommand, SimpleCommandPlugin
 import logging
@@ -105,5 +105,5 @@ class SimpleOptionsDemo(SimpleCommandPlugin):
         ]:
             lines.append('%s: %s' % (key, options[key]))
 
-        QtGui.QMessageBox.information(None, "Simple Options Demo Result",
-                                      "Selected Options:\n\n" + '\n'.join(lines))
+        QtWidgets.QMessageBox.information(None, "Simple Options Demo Result",
+                                          "Selected Options:\n\n" + '\n'.join(lines))

@@ -1,26 +1,4 @@
-# coding=utf-8
 """
-    hilbert
-"""
-from __future__ import absolute_import, division, print_function
-import logging
-import math
-
-from OpenGL import GL
-from PySide import QtGui
-
-from mcedit2.plugins import registerGeneratePlugin
-from mcedit2.rendering.scenegraph.vertex_array import VertexNode
-from mcedit2.rendering.vertexarraybuffer import VertexArrayBuffer
-from mcedit2.synth.l_system import Geometric, Symbol
-from mcedit2.synth.l_system_plugin import LSystemPlugin
-from mcedit2.util import bresenham
-from mcedit2.widgets.blockpicker import BlockTypeButton
-
-log = logging.getLogger(__name__)
-"""
-
-
     In 2D:
 
     Each cell has an initial subcell index, and a 'forward/backward' marker.
@@ -55,27 +33,42 @@ log = logging.getLogger(__name__)
     left: (1, 0), (0, 0), (0, 1), (1, 1)
 
 """
-#
-# offsets = [
-#     (0, 0, 0),
-#     (0, 0, 1),
-#     (0, 1, 1),
-#     (0, 1, 0),
-#     (1, 1, 0),
-#     (1, 1, 1),
-#     (1, 0, 1),
-#     (1, 0, 0),
-# ]
+from __future__ import absolute_import, division, print_function
+
+# coding=utf-8
+"""
+    hilbert
+"""
+import logging
+import math
+
+from OpenGL import GL
+from PySide6 import QtWidgets
+
+from mcedit2.plugins import registerGeneratePlugin
+from mcedit2.rendering.scenegraph.vertex_array import VertexNode
+from mcedit2.rendering.vertexarraybuffer import VertexArrayBuffer
+from mcedit2.synth.l_system import Geometric, Symbol
+from mcedit2.synth.l_system_plugin import LSystemPlugin
+from mcedit2.util import bresenham
+from mcedit2.widgets.blockpicker import BlockTypeButton
+
+log = logging.getLogger(__name__)
+
 offsets = [
     (0, 0), (0, 1), (1, 1), (1, 0),
 ]
 
 ncells = len(offsets)
+
+
 def nextSubcells(N):
-    return N, N, N, (N+2) % ncells
+    return N, N, N, (N + 2) % ncells
+
 
 def getOffsets(initialIndex):
     return offsets[initialIndex:] + offsets[:initialIndex]
+
 
 class Cell(Symbol):
     """
@@ -88,6 +81,7 @@ class Cell(Symbol):
     p1: Vector
     p2: Vector
     """
+
     def replace(self):
         x, y, z = self.origin
         cellSize = self.cellSize
@@ -104,25 +98,23 @@ class Cell(Symbol):
 
         if forward:
             nextForwards = False, True, True, False
-            d=1
+            d = 1
         else:
             nextForwards = True, False, False, True
-            d=-1
+            d = -1
 
         offsets = getOffsets(initialIndex)
 
-
         for i, (subcellIndex, forward) in enumerate(zip(subcellIndices, nextForwards)):
-            dx, dz = offsets[d*i]
+            dx, dz = offsets[d * i]
             origin = (x + dx * cellSize, y, z + dz * cellSize)
             yield Cell(origin=origin, cellSize=cellSize,
                        forward=forward, initialIndex=subcellIndex)
 
 
-
-
 Clock = True
 Counter = False
+
 
 class HilbertCurveShell(Geometric):
     """
@@ -134,8 +126,9 @@ class HilbertCurveShell(Geometric):
 
     + properties inherited from Geometric
     """
+
     def replace(self):
-        size = min(self.size[0], self.size[2]) # xxx 3d
+        size = min(self.size[0], self.size[2])  # xxx 3d
         cellSize = 1
         while cellSize <= size:
             cellSize <<= 1
@@ -151,19 +144,19 @@ class HilbertCurveShell(Geometric):
 class HilbertCurvePlugin(LSystemPlugin):
     displayName = "Hilbert Curve"
     _optionsWidget = None
-    
+
     def getOptionsWidget(self):
         if self._optionsWidget:
             return self._optionsWidget
 
-        widget = self._optionsWidget = QtGui.QWidget()
+        widget = self._optionsWidget = QtWidgets.QWidget()
 
         self.blockTypeButton = BlockTypeButton()
         self.blockTypeButton.editorSession = self.editorSession
         self.blockTypeButton.block = "minecraft:stone"
         self.blockTypeButton.blocksChanged.connect(self.updatePreview)
 
-        layout = QtGui.QFormLayout()
+        layout = QtWidgets.QFormLayout()
         layout.addRow(self.tr("Iterations"), self.iterationsSlider)
         layout.addRow(self.tr("Block"), self.blockTypeButton)
 
@@ -172,7 +165,6 @@ class HilbertCurvePlugin(LSystemPlugin):
 
     def createInitialSymbol(self, bounds):
         symbol = HilbertCurveShell(bounds, blocktype=self.blockTypeButton.block)
-
         return symbol
 
     def renderSceneNodes(self, symbol_list):
@@ -195,7 +187,7 @@ class HilbertCurvePlugin(LSystemPlugin):
             if not isinstance(cell1, Cell):
                 continue
             for p in bresenham.bresenham(cell1.origin, cell2.origin):
-                yield p + (self.blockTypeButton.block, )  #xxx line
+                yield p + (self.blockTypeButton.block,)  #xxx line
 
     def renderBlocks(self, symbol_list):
         return list(self._renderBlocks(symbol_list))
@@ -204,6 +196,7 @@ class HilbertCurvePlugin(LSystemPlugin):
         size = (bounds.width + bounds.length) / 2
         maxiter = math.log(size, 2) + 2
         self.iterationsSlider.setMaximum(maxiter)
+
 
 displayName = "Hilbert Curve"
 

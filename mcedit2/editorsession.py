@@ -451,7 +451,7 @@ class EditorSession(QtCore.QObject):
         self.toolClasses = list(editortools.ToolClasses())
         self.toolActionGroup = QtGui.QActionGroup(self)
         self.tools = [cls(self) for cls in self.toolClasses]
-        self.toolActions = [tool.pickToolAction() for tool in self.tools]
+        self.toolActions = [tool.pickToolAction for tool in self.tools]
         self.actionsByName = {action.toolName: action for action in self.toolActions}
         for tool in self.tools:
             tool.toolPicked.connect(self.chooseTool)

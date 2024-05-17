@@ -6,7 +6,7 @@ import logging
 from math import pi, cos, sin
 from random import Random
 import time
-from PySide import QtGui
+from PySide6 import QtWidgets
 from mcedit2.plugins import registerGeneratePlugin
 
 from mcedit2.synth.l_system import Geometric, Line, Fill
@@ -53,9 +53,9 @@ class City(Geometric):
 
         buildingCount = (self.width + self.length) / (MINSIZE * 6)
 
-        for i in xrange(1, buildingCount):
+        for i in range(1, int(buildingCount)):
             print('Constructing building %s of %s' % (i, buildingCount))
-            r = self.random.randint(0, halfSize.x / 8 * 7)
+            r = self.random.randint(0, int(halfSize.x / 8 * 7))
             theta = self.random.random() * TwoPI
             phi = 0
             (x1, y1, z1) = polarToCartesian(theta, phi, r) + groundOrigin
@@ -154,9 +154,9 @@ class BuildingAngled(Geometric):
         TwoPI = 2 * pi
 
         SideLength = centreWidth
-        RINGS = self.random.randint(1, SideLength / 4 + 1)
+        RINGS = self.random.randint(1, SideLength // 4 + 1)
 
-        if Orientation == -1:  # Randomise
+        if Orientation == -1:
             Orientation = self.random.randint(0, 45)
 
         offsetX = 0
@@ -175,11 +175,11 @@ class BuildingAngled(Geometric):
             bandingSize1 = self.random.randint(2, 8)
             bandingSize2 = self.random.randint(1, bandingSize1)
 
-        for y in xrange(0, height):
+        for y in range(0, height):
             print('%s: %s of %s' % (method, y, height))
             radius = int(SideLength)
 
-            for r in xrange(1, radius):
+            for r in range(1, radius):
                 MATERIAL = fillBlock
                 ringR = int(SideLength / RINGS)
                 if ringR == 0:
@@ -199,7 +199,7 @@ class BuildingAngled(Geometric):
                     x = r * cos(Orientation * angle)
                     z = r * sin(Orientation * angle)
 
-                    for sides in xrange(0, numSides + 1):
+                    for sides in range(0, numSides + 1):
                         x1 = r * cos((Orientation + 360 / numSides * sides) * angle)
                         z1 = r * sin((Orientation + 360 / numSides * sides) * angle)
                         yield Line((self.minx + centreWidth + x + offsetX,
@@ -252,7 +252,7 @@ class RuinedBuilding(Geometric):
 
         # Floors
         print('%s: Floors' % method)
-        for iterY in xrange(0, height - 1):
+        for iterY in range(0, height - 1):
             if iterY == 0 or (iterY % 4 == 0 and self.random.randint(1, 10) > 1):
                 floorBox = BoundingBox((self.minx + 1, self.miny + iterY, self.minz + 1),
                                        (width - 1, 1, depth - 1))
@@ -366,7 +366,7 @@ def Factorise(number):
     """
     factors = set()
 
-    for i in xrange(1, int(number + 1)):
+    for i in range(1, int(number + 1)):
         r = number % i
         if r == 0:
             p = number / i
@@ -400,7 +400,7 @@ class CityGeneratePlugin(LSystemPlugin):
         if self.optionsWidget:
             return self.optionsWidget
 
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
 
         self.fillBlockButton = BlockTypeButton()
         self.fillBlockButton.editorSession = self.editorSession
@@ -417,13 +417,13 @@ class CityGeneratePlugin(LSystemPlugin):
         self.lightBlockButton.block = "minecraft:glass"
         self.lightBlockButton.blocksChanged.connect(self.updatePreview)
 
-        self.seedInput = QtGui.QSpinBox()
+        self.seedInput = QtWidgets.QSpinBox()
         self.seedInput.setMinimum(-(1<<30))
         self.seedInput.setMaximum((1<<30))
         self.seedInput.setValue(0)
         self.seedInput.valueChanged.connect(self.updatePreview)
 
-        layout = QtGui.QFormLayout()
+        layout = QtWidgets.QFormLayout()
         layout.addRow(self.tr("Iterations"), self.iterationsSlider)
         layout.addRow(self.tr("Seed"), self.seedInput)
         layout.addRow(self.tr("Fill"), self.fillBlockButton)

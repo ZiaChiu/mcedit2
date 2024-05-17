@@ -26,13 +26,13 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
     @property
     def id(self):
         if self.blockTypes is None:
-            log.warn("No blocktypes available, returning id")
+            log.warning("No blocktypes available, returning id")
             return self.rootTag["Item"].value
         try:
             itemType = self.blockTypes.itemTypes[self.rootTag["Item"].value]
             return itemType.internalName
         except KeyError:
-            log.warn("No ItemType defined for %s, returning id" % self.rootTag["Item"].value)
+            log.warning("No ItemType defined for %s, returning id", self.rootTag["Item"].value)
             return self.rootTag["Item"].value
 
     @id.setter
@@ -43,12 +43,12 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
                 self.Damage = value.meta
         elif isinstance(value, int):
             self.rootTag["Item"] = nbt.TAG_Short(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             if self.blockTypes is None:
                 raise ValueError("DrawerItemStackRef must be parented to assign string IDs")
             self.rootTag["Item"] = nbt.TAG_Short(self.blockTypes.itemTypes[value].ID)
         else:
-            raise TypeError("Invalid type for ItemStackRef.id: %r", type(value))
+            raise TypeError("Invalid type for ItemStackRef.id: %r" % type(value))
 
         self.dirty = True
 
@@ -57,7 +57,7 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
         if self.blockTypes is None:
             raise ValueError("Cannot get itemType for this item. BlockTypes not set. ")
         try:
-            itemType = self.blockTypes.itemTypes[self.rootTag["Item"].value, self.Damage]
+            itemType = self.blockTypes.itemTypes[(self.rootTag["Item"].value, self.Damage)]
             return itemType
         except KeyError:
             raise ValueError("Cannot get itemType for this item. BlockTypes has no item for %s." % self.rootTag["Item"].value)
@@ -65,7 +65,7 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
     @itemType.setter
     def itemType(self, value):
         if not isinstance(value, ItemType):
-            raise TypeError("Expected ItemType, got %r", type(value))
+            raise TypeError("Expected ItemType, got %r" % type(value))
         self.id = value
 
     @property
@@ -76,12 +76,12 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
     def raw_id(self, value):
         if isinstance(value, int):
             self.rootTag["Item"] = nbt.TAG_Short(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             if self.blockTypes is None:
                 raise ValueError("DrawerItemStackRef must be parented to assign string IDs")
             self.rootTag["Item"] = nbt.TAG_Short(self.blockTypes.itemTypes[value].ID)
         else:
-            raise TypeError("Invalid type for ItemStack.id: %r", type(value))
+            raise TypeError("Invalid type for ItemStack.id: %r" % type(value))
 
         self.dirty = True
 
@@ -94,7 +94,6 @@ class DrawerItemStackRef(nbtattr.NBTCompoundRef):
 
 class DrawerSlotsListProxy(nbtattr.NBTListProxy):
     def putItemInSlot(self, item, slot):
-        # extend self?
         self[slot] = item
 
     def getItemInSlot(self, slot):

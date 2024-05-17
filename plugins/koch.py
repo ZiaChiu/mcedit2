@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, print_function
 import logging
 from math import pi, cos, sin
-from PySide import QtGui
+from PySide6 import QtWidgets
 import math
 from mcedit2.plugins import registerGeneratePlugin
 
@@ -14,8 +14,8 @@ from mcedit2.synth.l_system_plugin import LSystemPlugin
 from mcedit2.widgets.blockpicker import BlockTypeButton
 from mceditlib.geometry import Vector
 
-
 log = logging.getLogger(__name__)
+
 
 class Side(Line):
     """
@@ -29,6 +29,7 @@ class Side(Line):
     p1: Vector
     p2: Vector
     """
+
     def replace(self):
         p1 = self.p1
         p2 = self.p2
@@ -61,9 +62,9 @@ SIN_THETA = sin(THETA)
 # Also works for vectors! We use it to rotate the vector
 # added to get the new point when replacing a side with
 # four smaller sides.
-
-def rotatePoint((x, y, z)):
-    u"""
+def rotatePoint(point):
+    x, y, z = point
+    """
     Rotation matrix:
 
     | cos θ   - sin θ  |
@@ -92,6 +93,7 @@ class Snowflake(Geometric):
 
     + properties inherited from Geometric
     """
+
     def replace(self):
         # Find the first corner's position relative to the hexagon's center
         center = Vector(self.center.x, self.miny, self.center.z)
@@ -124,22 +126,23 @@ if __name__ == '__main__':
         print(point)
         point = rotatePoint(point)
 
+
 class KochSnowflakePlugin(LSystemPlugin):
     displayName = "Koch Snowflake"
     _optionsWidget = None
-    
+
     def getOptionsWidget(self):
         if self._optionsWidget:
             return self._optionsWidget
 
-        widget = self._optionsWidget = QtGui.QWidget()
+        widget = self._optionsWidget = QtWidgets.QWidget()
 
         self.blockTypeButton = BlockTypeButton()
         self.blockTypeButton.editorSession = self.editorSession
         self.blockTypeButton.block = "minecraft:stone"
         self.blockTypeButton.blocksChanged.connect(self.updatePreview)
 
-        layout = QtGui.QFormLayout()
+        layout = QtWidgets.QFormLayout()
         layout.addRow(self.tr("Iterations"), self.iterationsSlider)
         layout.addRow(self.tr("Block"), self.blockTypeButton)
 
@@ -148,7 +151,6 @@ class KochSnowflakePlugin(LSystemPlugin):
 
     def createInitialSymbol(self, bounds):
         symbol = Snowflake(bounds, blocktype=self.blockTypeButton.block)
-
         return symbol
 
     def boundsChanged(self, bounds):
@@ -158,6 +160,7 @@ class KochSnowflakePlugin(LSystemPlugin):
         size = (bounds.width + bounds.length) / 2
         maxiter = math.log(size, 4) + 2
         self.iterationsSlider.setMaximum(maxiter)
+
 
 displayName = "Koch Snowflake"
 
