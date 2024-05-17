@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from PySide import QtCore
+from PySide6 import QtCore  # Use PySide6 for Python 3.12 compatibility
 
 
 def QObject_tr_unicode_literals_fix():
@@ -13,8 +13,8 @@ def QObject_tr_unicode_literals_fix():
     _tr = QtCore.QObject.tr
 
     def tr(ctx, string, *a, **kw):
-        if isinstance(string, unicode):
-            string = string.encode('ascii')
+        if isinstance(string, str):
+            string = string.encode('ascii').decode('ascii')
         return _tr(ctx, string, *a, **kw)
 
     QtCore.QObject.tr = tr
