@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-import imp
+import importlib.util
 import itertools
 import logging
 import os
@@ -24,7 +24,6 @@ settings = Settings().getNamespace("plugins")
 enabledPluginsSetting = settings.getOption("enabled_plugins", "json", {})
 autoReloadSetting = settings.getOption("auto_reload", bool, True)
 
-
 # *** plugins dialog will need to:
 # v get a list of (plugin display name, plugin reference, isEnabled) tuples for loaded and
 #       unloaded plugins.
@@ -46,7 +45,6 @@ autoReloadSetting = settings.getOption("auto_reload", bool, True)
 #   - check mod times of all plugin files under each PluginRef
 #   - if auto-reload is on, reload plugins
 #   - if auto-reload is off, ??? prompt to enable autoreload?
-
 
 # --- Plugin refs ---
 
@@ -91,29 +89,30 @@ class PluginRef:
 
     def findModule(self):
         """
-        Returns (file, pathname, description).
+        Returns (spec, pathname, description).
 
         May raise ImportError, EnvironmentError, maybe others?
-
-        If it is not none, caller is responsible for closing file. (see `imp.find_module`)
         """
         basename, ext = os.path.splitext(self.filename)
-        return imp.find_module(basename, [self.pluginsDir])
+        path = os.path.join(self.pluginsDir, self.filename)
+        spec = importlib.util.spec_from_file_location(basename, path)
+        return spec, path
 
     def load(self):
         if self.pluginModule:
             return True
 
         basename, ext = os.path.splitext(self.filename)
-        io = None
         try:
-            io, pathname, description = self.findModule()
+            spec, pathname = self.findModule()
             self.fullpath = pathname
             log.info("Trying to load plugin from %s", self.filename)
             global _currentPluginPathname
             _currentPluginPathname = pathname
 
-            self.pluginModule = imp.load_module(basename, io, pathname, description)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            self.pluginModule = module
             _loadedModules[self.fullpath] = self.pluginModule
             self.pluginModule.__FOUND_FILENAME__ = self.fullpath
 
@@ -133,9 +132,6 @@ class PluginRef:
             return False
         else:
             self.loadError = None
-        finally:
-            if io:
-                io.close()
 
         return True
 
@@ -203,8 +199,6 @@ class PluginRef:
         enabledPlugins = enabledPluginsSetting.value()
         enabledPlugins[self.filename] = value
         enabledPluginsSetting.setValue(enabledPlugins)
-
-
 # --- Plugin finding ---
 
 _pluginRefs = {}
@@ -236,22 +230,18 @@ def findNewPluginsInDir(pluginsDir):
 
 
 def detectPlugin(filename, pluginsDir):
-    io = None
     basename, ext = os.path.splitext(filename)
     if ext in (".pyc", ".pyo"):
         return None
 
     ref = PluginRef(filename, pluginsDir)
     try:
-        io, pathname, description = ref.findModule()
+        spec, pathname = ref.findModule()
     except Exception as e:
         log.exception("Could not detect %s as a plugin or module: %s", filename, e)
         return None
     else:
         return ref
-    finally:
-        if io:
-            io.close()
 
 
 # --- Plugin registration ---
@@ -324,8 +314,6 @@ def registerCustomWidget(cls):
     """
     registerClass(cls)
     return load_ui.registerCustomWidget(cls)
-
-
 def registerToolClass(cls):
     """
     Register a tool class. Class must inherit from EditorTool.
