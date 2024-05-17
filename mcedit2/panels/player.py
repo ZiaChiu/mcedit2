@@ -5,8 +5,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import uuid
 
-from PySide import QtGui
-from PySide.QtCore import Qt
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import Qt
 import itertools
 
 from mcedit2.command import SimpleRevisionCommand
@@ -25,8 +25,8 @@ from mceditlib.exceptions import PlayerNotFound
 log = logging.getLogger(__name__)
 
 def playerSlotLayout():
-    layout = [(x, 0, 100+x) for x in range(4)]  # equipment
-    layout += [(x, y+1, x+9*y+9) for x, y in itertools.product(range(9), range(3))]  # inventory
+    layout = [(x, 0, 100 + x) for x in range(4)]  # equipment
+    layout += [(x, y + 1, x + 9 * y + 9) for x, y in itertools.product(range(9), range(3))]  # inventory
     layout += [(x, 4, x) for x in range(9)]  # hotbar
     return layout
 
@@ -44,7 +44,7 @@ class PlayerPanel(QtGui.QWidget, Ui_playerWidget):
         :type editorSession: mcedit2.editorsession.EditorSession
         :rtype: PlayerPanel
         """
-        super(PlayerPanel, self).__init__(QtGui.qApp.mainWindow, f=Qt.Tool)
+        super(PlayerPanel, self).__init__(QtCore.QCoreApplication.instance().activeWindow(), f=Qt.Tool)
         self.setupUi(self)
 
         self.editorSession = editorSession
@@ -104,7 +104,6 @@ class PlayerPanel(QtGui.QWidget, Ui_playerWidget):
                 else:
                     PlayerDataCache.getPlayerInfo(UUID, _callback(idx))
 
-
         self.playerListBox.currentIndexChanged[int].connect(self.setSelectedPlayerIndex)
         if len(playerUUIDs):
             self.setSelectedPlayerIndex(0)
@@ -114,7 +113,7 @@ class PlayerPanel(QtGui.QWidget, Ui_playerWidget):
         action.setCheckable(True)
         action.triggered.connect(self.toggleView)
         self._toggleViewAction = action
-                     
+
         self.editorSession.revisionChanged.connect(self.revisionDidChange)
         self.initPropertiesWidget()
 
