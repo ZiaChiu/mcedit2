@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import os
 
-import numpy
+import numpy as np
 from OpenGL import GL
 
 from mcedit2.rendering.chunkmeshes.entity.models import cookedModels
@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 class PlayerNode(Node):
     def __init__(self, playerRef):
-        super(PlayerNode, self).__init__()
+        super().__init__()
         self.playerRef = playerRef
         self.entityNode = None
 
@@ -57,7 +57,7 @@ class PlayerNode(Node):
                 tex = glutils.Texture(name=os.path.basename(value), image=modelImage.ravel(),
                                       width=w, height=h)
             except Exception as e:
-                log.warn("Error while loading player texture: %r", e)
+                log.warning("Error while loading player texture: %r", e)
                 return
 
             if self.entityNode:
@@ -74,17 +74,19 @@ def fixupTextureImage(modelImage):
     w = 64
     h = 64
     oh, ow, b = modelImage.shape
-    
-    newImage = numpy.zeros((h, w, b), dtype='uint8')
+
+    newImage = np.zeros((h, w, b), dtype='uint8')
     newImage[:oh, :ow, :] = modelImage
-    #newImage = newImage[::-1, :, :]
+
+    # newImage = newImage[::-1, :, :]
 
     def drawImage(x1, y1, x2, y2, sx1, sy1, sx2, sy2):
-        def _slice(a, b):
-            if a > b:
-                return slice(a-1, b-1, -1)
+        def _slice(a, c):
+            if a > c:
+                return slice(a - 1, c - 1, -1)
             else:
-                return slice(a, b)
+                return slice(a, c)
+
         newImage[_slice(y1, y2), _slice(x1, x2)] = newImage[_slice(sy1, sy2), _slice(sx1, sx2)]
 
     drawImage(24, 48, 20, 52, 4, 16, 8, 20)
@@ -100,7 +102,7 @@ def fixupTextureImage(modelImage):
     drawImage(44, 52, 40, 64, 40, 20, 44, 32)
     drawImage(48, 52, 44, 64, 52, 20, 56, 32)
 
-    #newImage = newImage[::-1, :, :]
+    # newImage = newImage[::-1, :, :]
     # }
     #
     # graphics.dispose();
@@ -115,8 +117,9 @@ def fixupTextureImage(modelImage):
     # this.setAreaOpaque(16, 48, 48, 64);
     # this.setAreaTransparent(48, 48, 64, 64);
     # return bufferedimage;
-    
+
     return w, h, newImage
+
 
 class PlayersNode(Node):
     def __init__(self, dimension):
@@ -126,7 +129,7 @@ class PlayersNode(Node):
         ----------
         dimension : mceditlib.worldeditor.WorldEditorDimension
         """
-        super(PlayersNode, self).__init__()
+        super().__init__()
 
         playerNodes = []
         if not hasattr(dimension, 'worldEditor'):
