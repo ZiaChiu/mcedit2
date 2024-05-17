@@ -99,6 +99,7 @@ class SelectionScene(scenenode.Node):
         self.addState(self.blend)
         self.addChild(self.groupNode)
 
+        # TODO: find some way of pyside6 to replace the QTimer of pyside
         self.loadTimer = QtCore.QTimer(timeout=self.loadMore)
         self.loadTimer.setInterval(0)
         self.loadTimer.start()
