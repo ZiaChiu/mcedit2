@@ -1,12 +1,10 @@
-"""
-    plugins
-"""
 from __future__ import absolute_import, division, print_function
 
 import imp
 import itertools
 import logging
 import os
+import sys
 from collections import defaultdict
 
 from mcedit2 import editortools
@@ -19,13 +17,13 @@ from mceditlib.anvil import entities
 
 log = logging.getLogger(__name__)
 
-import sys
 sys.dont_write_bytecode = True
 
 settings = Settings().getNamespace("plugins")
 
 enabledPluginsSetting = settings.getOption("enabled_plugins", "json", {})
 autoReloadSetting = settings.getOption("auto_reload", bool, True)
+
 
 # *** plugins dialog will need to:
 # v get a list of (plugin display name, plugin reference, isEnabled) tuples for loaded and
@@ -52,7 +50,7 @@ autoReloadSetting = settings.getOption("auto_reload", bool, True)
 
 # --- Plugin refs ---
 
-class PluginRef(object):
+class PluginRef:
     _displayName = None
 
     def __init__(self, filename, pluginsDir):
@@ -83,7 +81,6 @@ class PluginRef(object):
                     pathname = os.path.join(dirname, child)
                     modtime = os.stat(pathname).st_mtime
                     timestamps[pathname] = modtime
-
         else:
             modtime = os.stat(filename).st_mtime
             timestamps[filename] = modtime
@@ -161,7 +158,7 @@ class PluginRef(object):
             log.info("Unloading plugin %s", self.displayName)
             self.pluginModule = None
             deadKeys = []
-            for k, v in sys.modules.iteritems():
+            for k, v in sys.modules.items():
                 if v is module:
                     deadKeys.append(k)
 
@@ -170,13 +167,13 @@ class PluginRef(object):
                 sys.modules.pop(k)
                 log.info("Removed module %s from sys.modules", k)
 
-            classes = _pluginClassesByPathname.pop(self.fullpath)
+            classes = _pluginClassesByPathname.pop(self.fullpath, [])
             if classes:
                 for cls in classes:
                     log.info("Unregistered %s", cls)
                     unregisterClass(cls)
 
-            _loadedModules.pop(module.__FOUND_FILENAME__)
+            _loadedModules.pop(module.__FOUND_FILENAME__, None)
             self.fullpath = None
 
         return True
@@ -207,6 +204,7 @@ class PluginRef(object):
         enabledPlugins[self.filename] = value
         enabledPluginsSetting.setValue(enabledPlugins)
 
+
 # --- Plugin finding ---
 
 _pluginRefs = {}
@@ -224,7 +222,7 @@ def getAllPlugins():
 
 def findNewPluginsInDir(pluginsDir):
     if not os.path.isdir(pluginsDir):
-        log.warn("Plugins dir %s not found", pluginsDir)
+        log.warning("Plugins dir %s not found", pluginsDir)
         return
 
     log.info("Loading plugins from %s", pluginsDir)
@@ -267,6 +265,7 @@ _registries = [
     generate.GeneratePlugins
 ]
 
+
 def registerClass(cls):
     _pluginClassesByPathname[_currentPluginPathname].append(cls)
     log.info("Registered class %s of plugin %s", cls, _currentPluginPathname)
@@ -280,6 +279,7 @@ def unregisterClass(cls):
 
     generate.GeneratePlugins.unregisterClass(cls)
     command.CommandPlugins.unregisterClass(cls)
+
 
 # --- Registration functions ---
 
@@ -309,9 +309,9 @@ def registerCustomWidget(cls):
     Register a custom QWidget class with the .ui file loader. This allows custom QWidget
     classes to be used in .ui files.
 
-    >>> from PySide import QtGui
+    >>> from PySide6 import QtWidgets
     >>> @registerCustomWidget
-    >>> class MyWidget(QtGui.QWidget):
+    >>> class MyWidget(QtWidgets.QWidget):
     >>>     pass
 
     Parameters
@@ -324,6 +324,7 @@ def registerCustomWidget(cls):
     """
     registerClass(cls)
     return load_ui.registerCustomWidget(cls)
+
 
 def registerToolClass(cls):
     """
@@ -346,6 +347,7 @@ def registerToolClass(cls):
     registerClass(cls)
     return editortools.registerToolClass(cls)
 
+
 def registerGeneratePlugin(cls):
     """
     Register a plugin for the Generate Tool. Class must inherit from GeneratePlugin.
@@ -367,14 +369,15 @@ def registerGeneratePlugin(cls):
     registerClass(cls)
     return generate.GeneratePlugins.registerClass(cls)
 
+
 def registerBlockInspectorWidget(cls):
     """
     Register a widget with the Block Inspector for editing a TileEntity
 
     The class must have a `tileEntityID` attribute.
 
-    >>> from PySide import QtGui
-    >>> class MyBarrelInspector(QtGui.QWidget):
+    >>> from PySide6 import QtWidgets
+    >>> class MyBarrelInspector(QtWidgets.QWidget):
     >>>     tileEntityID = "MyBarrel"
     >>>
     >>> registerBlockInspectorWidget(MyBarrelInspector)
@@ -390,6 +393,7 @@ def registerBlockInspectorWidget(cls):
     """
     registerClass(cls)
     return inspector.registerBlockInspectorWidget(cls)
+
 
 def registerTileEntityRefClass(ID, cls):
     """
@@ -415,6 +419,7 @@ def registerTileEntityRefClass(ID, cls):
     # xxx this is anvil.entities - delegate to correct world format
     registerClass(cls)
     return entities.registerTileEntityRefClass(ID, cls)
+
 
 # Convenience imports for plugin modules
 

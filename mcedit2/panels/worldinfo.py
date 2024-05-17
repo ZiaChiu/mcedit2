@@ -5,8 +5,8 @@ from __future__ import absolute_import
 import logging
 from contextlib import contextmanager
 
-from PySide import QtGui
-from PySide.QtCore import Qt
+from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6.QtCore import Qt
 
 from mcedit2.command import SimpleRevisionCommand
 from mcedit2.ui.panels.worldinfo import Ui_worldInfoWidget
@@ -16,12 +16,11 @@ from mcedit2.util.screen import centerWidgetInScreen
 log = logging.getLogger(__name__)
 
 
-class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
-
+class WorldInfoPanel(QtWidgets.QWidget, Ui_worldInfoWidget):
     editsDisabled = False
 
     def __init__(self, editorSession):
-        super(WorldInfoPanel, self).__init__(QtGui.qApp.mainWindow, f=Qt.Tool)
+        super(WorldInfoPanel, self).__init__(QtCore.QCoreApplication.instance().activeWindow(), f=Qt.Tool)
         self.setupUi(self)
 
         self.editorSession = editorSession
@@ -105,11 +104,10 @@ class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
             generatorIndex = self.generatorTypeCombo.findText(self.worldMeta.generatorName)
             if generatorIndex == -1:
                 self.generatorTypeCombo.addItem(self.worldMeta.generatorName)
-                generatorIndex = self.generatorTypeCombo.count()-1
+                generatorIndex = self.generatorTypeCombo.count() - 1
 
         self.generatorTypeCombo.setCurrentIndex(generatorIndex)
 
-        self.worldNameLineEdit.setText(self.worldMeta.LevelName)
         self.worldNameLineEdit.setText(self.worldMeta.LevelName)
         self.generatorSeedLineEdit.setText(str(self.worldMeta.RandomSeed))
         self.generatorOptionsLineEdit.setText(self.worldMeta.generatorOptions)
@@ -124,7 +122,7 @@ class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
         hourminute = (time % 24000)
 
         self.timeDays.setValue(day)
-        h, m = (hourminute / 1000), ((hourminute % 1000) / (1000.0/60.0))
+        h, m = (hourminute / 1000), ((hourminute % 1000) / (1000.0 / 60.0))
         self.timeLabel.setText('{h:02d}:{m:02d}'.format(h=int(h), m=int(m)))
         self.timeSlider.setValue(hourminute)
 
@@ -175,12 +173,12 @@ class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
         self.editorSession.pushCommand(command)
 
     def seedChanged(self):
-        if self.editsDisabled or self.worldMeta.RandomSeed == long(self.generatorSeedLineEdit.text()):
+        if self.editsDisabled or self.worldMeta.RandomSeed == int(self.generatorSeedLineEdit.text()):
             return
 
         command = WorldMetaEditCommand(self.editorSession, self.tr('Change Generator Random Seed'))
         with command.begin():
-            self.worldMeta.RandomSeed = long(self.generatorSeedLineEdit.text())
+            self.worldMeta.RandomSeed = int(self.generatorSeedLineEdit.text())
         self.editorSession.pushCommand(command)
 
     def generatorOptionsChanged(self):
@@ -216,7 +214,7 @@ class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
         generatorName = self.generatorTypeCombo.currentText()
         generatorIndex = self.generatorTypeCombo.findText(generatorName)
         if generatorIndex != -1:
-            itemData = self.generatorTypeCombo.itemData(-1)
+            itemData = self.generatorTypeCombo.itemData(generatorIndex)
             if itemData:
                 generatorName = itemData
 
@@ -291,6 +289,7 @@ class WorldInfoPanel(QtGui.QWidget, Ui_worldInfoWidget):
         with command.begin():
             self.worldMeta.allowCommands = self.commandsBool.isChecked()
         self.editorSession.pushCommand(command)
+
 
 class WorldMetaEditCommand(SimpleRevisionCommand):
     pass
