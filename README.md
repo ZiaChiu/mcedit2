@@ -1,6 +1,11 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/76956gfy2n7sl5me?svg=true)](https://ci.appveyor.com/project/codewarrior0/mcedit2)
 [![Build Status](https://travis-ci.org/mcedit/mcedit2.svg?branch=master)](https://travis-ci.org/mcedit/mcedit2)
 
+
+## update（In my opinion）: I am currently only focusing on fixing the UI, at least so that it can continue to be supported by the Qt and Python communities. As for the underlying logic, given that there are now more and better ways to edit maps, and Mojang has officially released some codes, I will try my best to find out if there is a way to replace the original logic.
+
+
+
 # MCEdit 2.0
 
 MCEdit 2.0 is the next version of MCEdit, the World Editor for Minecraft. MCEdit allows you to edit every aspect of
