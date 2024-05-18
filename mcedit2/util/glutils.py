@@ -15,23 +15,29 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 glutils.py
 
 Pythonesque wrappers around certain OpenGL functions.
+
+
+"""
+import functools
+
+"""
+Pythonesque wrappers around certain OpenGL functions.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from OpenGL import GL
 from OpenGL.GL.ARB import multitexture
 from OpenGL.extensions import alternate
-import numpy
+import numpy as np
 from contextlib import contextmanager
 
 import logging
 
 import weakref
 from OpenGL.GL import framebufferobjects as FBO
-import sys
-
 
 log = logging.getLogger(__name__)
+
 
 class gl(object):
     @classmethod
@@ -52,7 +58,7 @@ class gl(object):
     @classmethod
     @contextmanager
     def glPushAttrib(cls, *attribs):
-        allAttribs = reduce(lambda a, b: a | b, attribs)
+        allAttribs = functools.reduce(lambda a, b: a | b, attribs)
         try:
             GL.glPushAttrib(allAttribs)
             yield
@@ -92,9 +98,11 @@ class gl(object):
         cls.listCount -= n
         return GL.glDeleteLists(base, n)
 
+
 glActiveTexture = alternate(GL.glActiveTexture, multitexture.glActiveTextureARB)
 
 allDisplayLists = []
+
 
 class DisplayList(object):
 
@@ -104,6 +112,7 @@ class DisplayList(object):
 
         def _delete(r):
             allDisplayLists.remove(r)
+
         allDisplayLists.append(weakref.ref(self, _delete))
 
     @classmethod
@@ -145,12 +154,12 @@ class DisplayList(object):
     def getList(self):
         if self._list is None:
             l = gl.glGenLists(1)
-            self._list = numpy.array([l], 'uintc')
+            self._list = np.array([l], 'uintc')
         return self._list
 
     def call(self):
         assert self._list is not None
-        GL.glCallLists(self._list)
+        GL.glCallList(self._list)
 
 
 class Texture(object):
@@ -212,12 +221,14 @@ class Texture(object):
 
             def _delete(r):
                 Texture.allTextures.remove(r)
+
             self.allTextures.append(weakref.ref(self, _delete))
 
     def bind(self, load=True):
         self.gen()
         if load and self.dirty:
-            raise ValueError("Binding dirty/unloaded texture! Implicit loads not allowed; should not load during displaylist compilation.")
+            raise ValueError(
+                "Binding dirty/unloaded texture! Implicit loads not allowed; should not load during displaylist compilation.")
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._texID)
 
     def invalidate(self):
@@ -249,7 +260,7 @@ class FramebufferTexture(Texture):
 
             status = FBO.glCheckFramebufferStatus(FBO.GL_FRAMEBUFFER)
             if status != FBO.GL_FRAMEBUFFER_COMPLETE:
-                print ("glCheckFramebufferStatus: " + str(status))
+                print("glCheckFramebufferStatus: " + str(status))
                 self.enabled = False
                 return
 
@@ -266,7 +277,8 @@ class FramebufferTexture(Texture):
         else:
             GL.glReadBuffer(GL.GL_BACK)
 
-            GL.glPushAttrib(GL.GL_VIEWPORT_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_STENCIL_TEST | GL.GL_STENCIL_BUFFER_BIT)
+            GL.glPushAttrib(
+                GL.GL_VIEWPORT_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_STENCIL_TEST | GL.GL_STENCIL_BUFFER_BIT)
             GL.glDisable(GL.GL_STENCIL_TEST)
 
             GL.glViewport(0, 0, width, height)
