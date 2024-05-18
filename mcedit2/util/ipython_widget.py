@@ -6,7 +6,8 @@ from qtconsole.inprocess import QtInProcessKernelManager
 from PySide6 import QtWidgets, QtCore
 
 log = logging.getLogger(__name__)
-
+# TODO: ipython.lib.gui_support does not support pyside6 or qt 6
+# TODO: from the QT documentation to find a way replace gui_support
 def print_process_id():
     print('Process ID is:', os.getpid())
 
