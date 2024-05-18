@@ -1,14 +1,10 @@
-"""
-    ${NAME}
-"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 import os
 
-from PySide import QtUiTools, QtCore, QtGui
+from PySide6 import QtUiTools, QtCore, QtWidgets
 
 from mcedit2.util.resources import resourcePath
-
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +58,7 @@ def load_ui(name, parent=None, baseinstance=None):
     uifile.open(QtCore.QFile.ReadOnly)
     widget = loader.load(uifile, parent)
     uifile.close()
-    assert isinstance(widget, QtGui.QWidget)
+    assert isinstance(widget, QtWidgets.QWidget)
     # if not hasattr(sys, 'frozen'):
     #     log.info("Adding debug context menu: %s", name)
     #
@@ -79,8 +75,8 @@ def load_ui(name, parent=None, baseinstance=None):
     #                          stderr = None,
     #                          #shell=platform.system() == 'Windows'
     #                          )
-            #os.system(" ".join([cmd, callerFile, '/l', "%s" % callerLine]))
-            #log.warn("ARGS: %s", args)
+            # os.system(" ".join([cmd, callerFile, '/l', "%s" % callerLine]))
+            # log.warn("ARGS: %s", args)
 
         # if widget.contextMenuPolicy() == Qt.DefaultContextMenu:
         #     widget.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -90,7 +86,6 @@ def load_ui(name, parent=None, baseinstance=None):
         #     frame = frame.f_back
         #     callerFile = frame.f_code.co_filename
         #     callerLine = frame.f_lineno
-
 
         # showCallerSourceAction = QtGui.QAction("Open source code", widget, triggered=showCallerSource)
         # widget.addAction(showCallerSourceAction)
