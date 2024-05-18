@@ -1,28 +1,17 @@
-"""
-    ipython_widget
-"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 import os
-
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
-from IPython.lib import guisupport
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 
 log = logging.getLogger(__name__)
-
-# TODO: ipython.lib.gui_support does not support pyside6 or qt 6
-# TODO: from the QT documentation to find a way replace gui_support
 
 def print_process_id():
     print('Process ID is:', os.getpid())
 
 def terminal_widget(**kwargs):
-
     # Create an in-process kernel
-    # >>> print_process_id()
-    # will print the same process ID as the main process
     kernel_manager = QtInProcessKernelManager()
     kernel_manager.start_kernel()
     kernel = kernel_manager.kernel
@@ -53,7 +42,7 @@ def main():
 
     control.show()
 
-    guisupport.start_event_loop_qt6(app)
+    QtCore.QTimer.singleShot(0, app.exec)
 
 if __name__ == '__main__':
     main()
