@@ -24,8 +24,8 @@ include_dirs = [numpy.get_include()]
 
 mcedit2_ext_modules = cythonize(
     [
-        "src/mcedit2/rendering/blockmodels.pyx",
-        "src/mcedit2/rendering/modelmesh.pyx",
+        "mcedit2/rendering/blockmodels.pyx",
+        "mcedit2/rendering/modelmesh.pyx",
     ],
     )
 
@@ -48,15 +48,14 @@ setup(name='mcedit2',
           "Intended Audience :: End Users/Desktop",
           "Natural Language :: English",
           "Operating System :: OS Independent",
-          "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3.12",
           "Topic :: Utilities",
-          "License :: OSI Approved :: MIT License",
       ],
       keywords='minecraft',
       author='David Vierra',
       author_email='codewarrior0@gmail.com',
       url='https://github.com/mcedit/mcedit2',
-      license='MIT License',
+      license='MIT',
       packages=find_packages('src', include=["mcedit2*",]),
       package_dir={'': 'src'},
       ext_modules=mcedit2_ext_modules,
