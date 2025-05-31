@@ -1,9 +1,8 @@
 import logging
 import os
-from PySide6.scripts.pyside_tool import pyside6_uic
+import subprocess
 
 log = logging.getLogger(__name__)
-
 
 def compile_ui():
     from mcedit2.util import resources
@@ -17,7 +16,6 @@ def compile_ui():
     compile_ui_dir(uiDir, recurse=True)
     log.info("Done.")
 
-
 def compile_ui_dir(directory, recurse=False):
     for root, dirs, files in os.walk(directory):
         for file in files:
@@ -25,11 +23,10 @@ def compile_ui_dir(directory, recurse=False):
                 ui_file = os.path.join(root, file)
                 py_file = os.path.splitext(ui_file)[0] + ".py"
                 log.info(f"Compiling {ui_file} to {py_file}")
-                pyside6_uic.compileUi(ui_file, py_file)
+                subprocess.run(['pyside6-uic', ui_file, '-o', py_file], check=True)
 
         if not recurse:
             break
-
 
 if __name__ == '__main__':
     compile_ui()
