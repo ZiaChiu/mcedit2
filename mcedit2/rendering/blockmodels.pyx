@@ -235,7 +235,8 @@ cdef class BlockModels(object):
 
             self.loadModelParts(block, resourcePath, resourceVariant, parts)
 
-        hiddenModels = json.load(file(resources.resourcePath("mcedit2/rendering/hiddenstates_1_12.json"), "rb"))
+        hiddenModels = json.load(open(resources.resourcePath("mcedit2/rendering/hiddenstates_1_12.json"), "rb"))
+
         log.info("Loading %s hidden blockState models...", len(hiddenModels))
         hiddensLoaded = 0
         for i, hidden in enumerate(hiddenModels):
@@ -1003,7 +1004,8 @@ cdef void getBlockFaceVertices(float[] xyzuvstc,
 
     cdef float[8] tc
     if textureRotation:
-        roll = textureRotation / 90
+        # roll = textureRotation / 90
+        roll = int(textureRotation / 90)
         roll %= 4
         roll *= 2
         roll = 8 - roll
