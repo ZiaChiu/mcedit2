@@ -33,16 +33,26 @@ def getSrcFolder():
     # On Linux, it is locale-encoded and filenames are defined as bytestrings, so it is possible
     # to have a filename that cannot be interpreted as unicode. If the user writes a filename
     # that is not locale-encoded, he loses.
-    try:
-        # assert the source checkout is not in a non-representable path...
-        mod = mod.decode(sys.getfilesystemencoding())
-    except UnicodeDecodeError:
-        print("Script filename %r cannot be decoded with the current locale %s! "
-              "Please use sensible filenames." %
-              (mod, sys.getfilesystemencoding()))
-        raise
+    # ------------To Py3----------------
+    # try:
+    #     # assert the source checkout is not in a non-representable path...
+    #     mod = mod.decode(sys.getfilesystemencoding())
+    # except UnicodeDecodeError:
+    #     print("Script filename %r cannot be decoded with the current locale %s! "
+    #           "Please use sensible filenames." %
+    #           (mod, sys.getfilesystemencoding()))
+    #     raise
 
     return os.path.dirname(os.path.dirname(mod))
+
+# --- Python 3 update: ---
+# In Python 3, file paths are always Unicode strings, so .decode() is not needed.
+# The function can be simplified as follows:
+#
+# def getSrcFolder():
+#     import mcedit2
+#     mod = os.path.realpath(mcedit2.__file__)
+#     return os.path.dirname(os.path.dirname(mod))
 
 def resourcePath(filename):
     """
@@ -64,13 +74,29 @@ def resourcePath(filename):
     if basedir is None:
         # should work across platforms
         basedir = getSrcFolder()
-    elif sys.platform == 'win32':
-        basedir = basedir.decode('mbcs')
-    else:
-        basedir = basedir.decode(sys.getfilesystemencoding())
+
+    # ------------To Py3----------------
+    # elif sys.platform == 'win32':
+    #     basedir = basedir.decode('mbcs')
+    # else:
+    #     basedir = basedir.decode(sys.getfilesystemencoding())
 
     path = os.path.join(basedir, filename)
     if not os.path.exists(path):
         raise RuntimeError("Could not get resource path for %s\n(Tried %s which does not exist)" % (filename, path))
 
     return path
+
+# --- Python 3 update: ---
+# In Python 3, .decode() is not needed for file paths.
+# The function can be simplified as follows:
+#
+# def resourcePath(filename):
+#     filename = filename.replace('/', os.path.sep)
+#     basedir = getattr(sys, "_MEIPASS", None)
+#     if basedir is None:
+#         basedir = getSrcFolder()
+#     path = os.path.join(basedir, filename)
+#     if not os.path.exists(path):
+#         raise RuntimeError("Could not get resource path for %s\n(Tried %s which does not exist)" % (filename, path))
+#     return path
