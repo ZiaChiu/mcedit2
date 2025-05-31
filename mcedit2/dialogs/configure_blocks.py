@@ -145,6 +145,7 @@ class ConfigureBlocksItemModel(QtCore.QAbstractItemModel):
             return None
         if role == Qt.DisplayRole:
             return self.headerTitles[column]
+        return None
 
     def columnCount(self, index):
         return len(self.headerTitles)
@@ -209,25 +210,27 @@ class ConfigureBlocksItemModel(QtCore.QAbstractItemModel):
                 return blockDef.unlocalizedName
             if column == self.COL_ENGLISH:
                 return blockDef.englishName
+            return None
+        return None
 
     def setData(self, index, value, role=Qt.DisplayRole):
         row = index.row()
         column = index.column()
-        blockDef = self.definedBlocks[row]
+        block_def = self.definedBlocks[row]
         if role == Qt.EditRole:
             try:
                 if column == self.COL_ID:
-                    blockDef.internalName = value
+                    block_def.internalName = value
                 if column == self.COL_META:
-                    blockDef.meta = int(value)
+                    block_def.meta = int(value)
                 if column == self.COL_OPACITY:
-                    blockDef.opacity = int(value)
+                    block_def.opacity = int(value)
                 if column == self.COL_BRIGHTNESS:
-                    blockDef.brightness = int(value)
+                    block_def.brightness = int(value)
                 if column == self.COL_UNLOCALIZED:
-                    blockDef.unlocalizedName = value
+                    block_def.unlocalizedName = value
                 if column == self.COL_ENGLISH:
-                    blockDef.englishName = value
+                    block_def.englishName = value
             except ValueError:
                 log.exception("ValueError in setData")
                 return False
@@ -252,9 +255,9 @@ class ConfigureBlocksItemModel(QtCore.QAbstractItemModel):
         del self.definedBlocks[row]
         self.endRemoveRows()
 
-    def setBlockModelPath(self, row, modelPath):
-        blockDef = self.definedBlocks[row]
-        blockDef.modelPath = modelPath
+    def setBlockModelPath(self, row, model_path):
+        block_def = self.definedBlocks[row]
+        block_def.modelPath = model_path
 
 
 class ConfigureBlocksDialog(QtWidgets.QDialog, Ui_configureBlocks):
@@ -274,4 +277,4 @@ class ConfigureBlocksDialog(QtWidgets.QDialog, Ui_configureBlocks):
 
         self.blocksView.clicked.connect(self.currentBlockClicked)
 
-        self.internalNameBox.editTextChanged.connect(self.nameTextChanged
+        self.internalNameBox.editTextChanged.connect(self.nameTextChanged)
