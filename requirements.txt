@@ -1,6 +1,6 @@
 -r requirements-mceditlib.txt
 pyzmq  # v15.4.0 fails to freeze with PyInstaller - see pyinstaller/issues/2147
-pyside6>=6.5.2
+pyside6
 pyopengl>=3.1.9
 ipython>=9.3.0
 qtconsole>=5.6.1
