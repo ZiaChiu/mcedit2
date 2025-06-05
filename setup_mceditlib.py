@@ -22,8 +22,8 @@ install_requires = [
 include_dirs = [numpy.get_include()]
 
 mceditlib_ext_modules = cythonize([
-    "src/mceditlib/nbt.pyx",
-    "src/mceditlib/relight/with_cython.pyx"
+    "mceditlib/nbt.pyx",
+    "mceditlib/relight/with_cython.pyx"
 ],
     compile_time_env={'IS_PY2': sys.version_info[0] < 3},
     )
