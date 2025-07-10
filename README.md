@@ -4,8 +4,8 @@
 
 ## update（In my opinion）: I am currently only focusing on fixing the UI, at least so that it can continue to be supported by the Qt and Python communities. As for the underlying logic, given that there are now more and better ways to edit maps, and Mojang has officially released some codes, I will try my best to find out if there is a way to replace the original logic.
 
-
-
+## More details:
+[![changelog](https://img.shields.io/badge/changelog-available-blue.svg)](changelog.md)
 # MCEdit 2.0
 
 MCEdit 2.0 is the next version of MCEdit, the World Editor for Minecraft. MCEdit allows you to edit every aspect of
