@@ -468,9 +468,9 @@ cdef class _TAG_Compound(TAG_Value):
 
     def __init__(self, value=None, name=None):
         if name is None:
-            IF UNICODE_NAMES:
+            if UNICODE_NAMES:
                 name = u""
-            ELSE:
+            else:
                 name = ""
         self.value = value or []
         self.name = name
@@ -869,9 +869,9 @@ def hexdump(src, length=8):
 
 cdef void cwrite(obj, char *buf, size_t len):
     #print "cwrite %s %s %d" % (map(ord, buf[:min(4, len)]), buf[:min(4, len)].decode('ascii', 'replace'), len)
-    IF IS_PY2:
-        PycStringIO.cwrite(obj, buf, len)
-    ELSE:
+    # IF IS_PY2:
+    #     PycStringIO.cwrite(obj, buf, len)
+    # ELSE:
         obj.write(buf[:len])
 
 
@@ -880,12 +880,16 @@ cdef void save_tag_id(char tagID, object buf):
 
 
 cdef save_tag_name(TAG_Value tag, object buf):
-    IF UNICODE_NAMES:
-        cdef unicode name = tag._name
+    # IF UNICODE_NAMES:
+    #     cdef unicode name = tag._name
+    #     save_string(name.encode('utf-8'), buf)
+    # ELSE:
+    #     save_string(tag._name, buf)
+    if UNICODE_NAMES:
+        name = <unicode> tag._name
         save_string(name.encode('utf-8'), buf)
-    ELSE:
+    else:
         save_string(tag._name, buf)
-
 
 cdef void save_string(bytes value, object buf):
     cdef short length = <short>len(value)
