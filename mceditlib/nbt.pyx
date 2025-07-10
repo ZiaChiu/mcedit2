@@ -38,62 +38,46 @@ DEF UNICODE_NAMES = True
 # For each NBT file loaded, cache all of the unicode strings used for tag names. Saves some hundred kilobytes per
 # file since tag names often appear multiple times
 
-# # The value of the IS_PY2 macro is received from the build script
-# IF IS_PY2:
-#     DEF UNICODE_CACHE = True
-# ELSE:
+# The value of the IS_PY2 macro is received from the build script
+IF IS_PY2:
+    DEF UNICODE_CACHE = True
+ELSE:
     # This codepath is currently unsupported in the python3 version
-DEF UNICODE_CACHE = False
+    DEF UNICODE_CACHE = False
 
 import collections
 import gzip
 import zlib
 
-from cpython.ref cimport PyTypeObject
-from cpython.unicode cimport PyUnicode_DecodeUTF8
-from cpython.list cimport PyList_Append
-
-# IF IS_PY2:
-#     from cStringIO import StringIO
-#     from cpython cimport PyString_FromStringAndSize
-#     binary_type = str
-#     cdef object iteritems(obj):
-#         return obj.iteritems()
-# ELSE:
-
-from io import BytesIO as StringIO
-binary_type = bytes
-cdef object iteritems(obj):
-    return obj.items()
+from cpython cimport PyTypeObject, PyUnicode_DecodeUTF8, PyList_Append
+IF IS_PY2:
+    from cStringIO import StringIO
+    from cpython cimport PyString_FromStringAndSize
+    binary_type = str
+    cdef object iteritems(obj):
+        return obj.iteritems()
+ELSE:
+    from io import BytesIO as StringIO
+    binary_type = bytes
+    cdef object iteritems(obj):
+        return obj.items()
 
 import numpy
 
-# IF IS_PY2:
-#     cdef extern from "cStringIO.h":
-#         struct PycStringIO_CAPI:
-#             int cwrite(object o, char * buf, Py_ssize_t len)
-#             PyTypeObject * OutputType
-#     cdef extern from "cobject.h":
-#         void * PyCObject_Import(char * module_name, char * cobject_name)
-#
-#     cdef PycStringIO_CAPI *PycStringIO = <PycStringIO_CAPI *> PyCObject_Import("cStringIO", "cStringIO_CAPI")
-#     cdef PyTypeObject * StringO = PycStringIO.OutputType
-# ELSE:
-#     # The equivalent python3 code has not been written, so for now we fall back
-#     # on a codepath that might have poor performance.
-#     pass
+IF IS_PY2:
+    cdef extern from "cStringIO.h":
+        struct PycStringIO_CAPI:
+            int cwrite(object o, char * buf, Py_ssize_t len)
+            PyTypeObject * OutputType
+    cdef extern from "cobject.h":
+        void * PyCObject_Import(char * module_name, char * cobject_name)
 
-
-# Simulate StringO using the Python 3 BytesIO type
-cdef PyTypeObject * StringO = <PyTypeObject*> (<object>StringIO()).__class__
-
-cdef int cwrite(object o, char *buf, Py_ssize_t length):
-    try:
-        o.write(bytes(<char[:length]> buf))
-        return 0
-    except Exception:
-        return -1
-
+    cdef PycStringIO_CAPI *PycStringIO = <PycStringIO_CAPI *> PyCObject_Import("cStringIO", "cStringIO_CAPI")
+    cdef PyTypeObject * StringO = PycStringIO.OutputType
+ELSE:
+    # The equivalent python3 code has not been written, so for now we fall back
+    # on a codepath that might have poor performance.
+    pass
 
 # Tag IDs
 
@@ -150,16 +134,10 @@ def try_gunzip(data):
 #
 
 cdef class TAG_Value:
-    cdef object _name  # Can hold either `unicode` or `bytes`
-    def __cinit__(self):
-        if UNICODE_NAMES:
-            self._name = u""
-        else:
-            self._name = b""
-    # if UNICODE_NAMES:
-    #     cdef unicode _name
-    # else:
-    #     cdef bytes _name
+    IF UNICODE_NAMES:
+        cdef unicode _name
+    ELSE:
+        cdef bytes _name
     cdef public char tagID
 
     def __repr__(self):
@@ -173,14 +151,13 @@ cdef class TAG_Value:
             return self._name
 
         def __set__(self, val):
-            if UNICODE_NAMES:
+            IF UNICODE_NAMES:
                 if isinstance(val, binary_type):
                     val = PyUnicode_DecodeUTF8(val, len(val), "strict")
-            else:
+            ELSE:
                 if isinstance(val, unicode):
                     val = str(val)
             self._name = val
-
 
     def __reduce__(self):
         return self.__class__, (self.value, self._name)
@@ -468,9 +445,9 @@ cdef class _TAG_Compound(TAG_Value):
 
     def __init__(self, value=None, name=None):
         if name is None:
-            if UNICODE_NAMES:
+            IF UNICODE_NAMES:
                 name = u""
-            else:
+            ELSE:
                 name = ""
         self.value = value or []
         self.name = name
@@ -624,11 +601,9 @@ cdef class load_ctx:
     cdef char * buffer
     cdef size_t size
 
-# if UNICODE_CACHE:
-#     cdef dict u_cache = dict()
-cdef dict u_cache = None
-if UNICODE_CACHE:
-    u_cache = dict()
+IF UNICODE_CACHE:
+    cdef dict u_cache = dict()
+
 
 cdef char * read(load_ctx self, size_t s) except NULL:
     if s > self.size - self.offset:
@@ -739,50 +714,35 @@ cdef unicode load_string(load_ctx ctx):
     b = read(ctx, length)
     u = PyUnicode_DecodeUTF8(b, length, "strict")
     return u
-#
-# if UNICODE_NAMES:
-#     cdef unicode load_name(load_ctx ctx):
-#         """
-#         Like load_string, but caches the unicode object in u_cache to save memory
-#         """
-#         cdef unsigned short * ptr = <unsigned short *> read(ctx, 2)
-#         cdef unsigned short length = ptr[0]
-#         swab(&length, 2)
-#         b = read(ctx, length)
-#         if UNICODE_CACHE:
-#             s = PyString_FromStringAndSize(b, length)
-#             u = u_cache.get(s)
-#             if u is None:
-#                 u = u_cache[s] = PyUnicode_DecodeUTF8(b, length, "strict")
-#
-#         else:
-#             u = PyUnicode_DecodeUTF8(b, length, "strict")
-#         return u
-# else:
-#     cdef bytes load_name(load_ctx ctx):
-#         """
-#         Like load_string, but returns a str instead so python can intern it, saving memory.
-#         """
-#         cdef unsigned short *ptr = <unsigned short *> read(ctx, 2)
-#         cdef unsigned short length = ptr[0]
-#         swab(&length, 2)
-#
-#         return read(ctx, length)[:length]
 
-# Unicode version
-cdef unicode load_unicode_name(load_ctx ctx):
-    cdef size_t length = read_byte(ctx)
-    cdef bytes b = read(ctx, length)
-    cdef unicode u = PyUnicode_DecodeUTF8(b, length, "strict")
-    return u
+IF UNICODE_NAMES:
+    cdef unicode load_name(load_ctx ctx):
+        """
+        Like load_string, but caches the unicode object in u_cache to save memory
+        """
+        cdef unsigned short * ptr = <unsigned short *> read(ctx, 2)
+        cdef unsigned short length = ptr[0]
+        swab(&length, 2)
+        b = read(ctx, length)
+        IF UNICODE_CACHE:
+            s = PyString_FromStringAndSize(b, length)
+            u = u_cache.get(s)
+            if u is None:
+                u = u_cache[s] = PyUnicode_DecodeUTF8(b, length, "strict")
 
-# Byte version
-cdef bytes load_bytes_name(load_ctx ctx):
-    cdef size_t length = read_byte(ctx)
-    return read(ctx, length)
+        ELSE:
+            u = PyUnicode_DecodeUTF8(b, length, "strict")
+        return u
+ELSE:
+    cdef bytes load_name(load_ctx ctx):
+        """
+        Like load_string, but returns a str instead so python can intern it, saving memory.
+        """
+        cdef unsigned short *ptr = <unsigned short *> read(ctx, 2)
+        cdef unsigned short length = ptr[0]
+        swab(&length, 2)
 
-
-
+        return read(ctx, length)[:length]
 
 # --- Load array types ---
 
@@ -869,9 +829,9 @@ def hexdump(src, length=8):
 
 cdef void cwrite(obj, char *buf, size_t len):
     #print "cwrite %s %s %d" % (map(ord, buf[:min(4, len)]), buf[:min(4, len)].decode('ascii', 'replace'), len)
-    # IF IS_PY2:
-    #     PycStringIO.cwrite(obj, buf, len)
-    # ELSE:
+    IF IS_PY2:
+        PycStringIO.cwrite(obj, buf, len)
+    ELSE:
         obj.write(buf[:len])
 
 
@@ -880,16 +840,12 @@ cdef void save_tag_id(char tagID, object buf):
 
 
 cdef save_tag_name(TAG_Value tag, object buf):
-    # IF UNICODE_NAMES:
-    #     cdef unicode name = tag._name
-    #     save_string(name.encode('utf-8'), buf)
-    # ELSE:
-    #     save_string(tag._name, buf)
-    if UNICODE_NAMES:
-        name = <unicode> tag._name
+    IF UNICODE_NAMES:
+        cdef unicode name = tag._name
         save_string(name.encode('utf-8'), buf)
-    else:
+    ELSE:
         save_string(tag._name, buf)
+
 
 cdef void save_string(bytes value, object buf):
     cdef short length = <short>len(value)
